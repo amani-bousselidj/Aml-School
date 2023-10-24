@@ -1,0 +1,46 @@
+{
+    "sections": [
+        {
+            "section_title": "Section 1",
+            "video_lessons": [
+                {
+                    "title": "Lesson 1",
+                    "video_url": "https://example.com/video1",
+                    "duration": 30,
+                    "summary": "Introduction to the course"
+                }
+            ],
+            "quiz": {
+                "title": "Quiz for Section 1",
+                "description": "Assessment for Section 1",
+                "questions": [
+                    {
+                        "question_text": "What is 2 + 2?",
+                        "correct_answer": "4",
+                        "choices": [
+                            {
+                                "choice_text": "3",
+                                "is_correct_answer": false
+                            },
+                            {
+                                "choice_text": "4",
+                                "is_correct_answer": true
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    ],
+    "title": "Your Course Title",
+    "description": "Description of your course",
+    "cover_image": "C:/Users/imed/Desktop/Schoolproject/lesson_images/4.png",
+    "class_or_level": "Class X",
+    "course_preview_url": "https://example.com/preview",
+    "price": 49.99,
+    "discount": 10.0,
+    "is_free": false,
+    "visibility": true,
+    "assign_teacher": 1,
+    "course_category": 1
+}
