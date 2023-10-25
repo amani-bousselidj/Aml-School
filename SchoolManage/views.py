@@ -1051,3 +1051,8 @@ class CreateCourseWithSectionsQuizzesLessonsView(generics.ListCreateAPIView):
             return response
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+# def index(request):
+#     return render(request, "build/index.html")

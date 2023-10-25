@@ -32,7 +32,7 @@ CORS_ALLOW_ALL_ORIGINS = False# Application definition
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",  # For development
-   "https://aml-school.onrender.com " # For production
+   "https://aml-school.onrender.com" # For production
 ]
 # CORS_ALLOW_ORIGIN_WHITELIST = [
 #     "http://localhost:5173",  # Add your React frontend URL
@@ -89,8 +89,8 @@ ROOT_URLCONF = 'Schoolproject.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR,'project-school/components')],
-        'APP_DIRS': True,
+        'DIRS': [os.path.join(BASE_DIR, 'project-school')] , #Look, we have added the root folder of frontend here
+                                                        'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -155,7 +155,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # Additional static file locations (if needed)
 STATIC_DIRS = [
-    os.path.join(BASE_DIR, 'project-school/dist/assets'),
+    os.path.join(BASE_DIR,"build", "assets", 'project-school'),
 ]
 
 # Default primary key field type
