@@ -27,17 +27,17 @@ DEBUG = True
 CORS_ALLOW_HEADERS = ['*']
 CORS_ALLOW_METHODS = ['*']
 CSRF_COOKIE_SAMESITE = 'None'
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['*','aml-school.onrender.com']
 CORS_ALLOW_ALL_ORIGINS = False# Application definition
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",  # For development
-    # "https://your-production-app.com",  # For production
+   "https://aml-school.onrender.com " # For production
 ]
 # CORS_ALLOW_ORIGIN_WHITELIST = [
 #     "http://localhost:5173",  # Add your React frontend URL
 # ]
-# CSRF_COOKIE_SAMESITE = 'Lax'  # For production
+CSRF_COOKIE_SAMESITE = 'Lax'  # For production
 
 
 CORS_ALLOW_CREDENTIALS= True  # For development; in production, specify your frontend's origin.
