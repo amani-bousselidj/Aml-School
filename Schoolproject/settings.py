@@ -89,8 +89,8 @@ ROOT_URLCONF = 'Schoolproject.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'project-school')] , #Look, we have added the root folder of frontend here
-                                                        'APP_DIRS': True,
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+       'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -154,8 +154,8 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # Additional static file locations (if needed)
-STATIC_DIRS = [
-    os.path.join(BASE_DIR,"build", "assets", 'project-school'),
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'Schoolproject/static')
 ]
 
 # Default primary key field type
@@ -179,8 +179,10 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',  # Default ModelBackend
     # Add any custom backends if needed
 ]
-
+SITE_LOGO_URL = '/static/admin/img/about-image-02.png'  # Default logo URL
 JAZZMIN_SETTINGS = {
+     "related_modal_active": False,
+    "custom_css": "/static/css/custom_admin.css",
     "topmenu_links": [
 
         # Url that gets reversed (Permissions can be added)
@@ -194,7 +196,11 @@ JAZZMIN_SETTINGS = {
 
         # App with dropdown menu to all its models pages (Permissions checked against models)
         {"app": "books"},
+
     ],
+    # "site_title": "Aml School",
+    # "site_header": "{{ settings.SITE_HEADER }}",
+    # "site_logo": "{{ settings.SITE_LOGO_URL }}",
         "navigation_expanded": True,
     "copyright": "Aml School",
     "changeform_format": "horizontal_tabs",

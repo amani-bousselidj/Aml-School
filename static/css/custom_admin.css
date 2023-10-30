@@ -1,0 +1,7 @@
+/* custom_admin.css */
+
+/* Apply custom styling to the list display fields */
+#content .module table tbody td {
+    display: block;
+    margin: 5px 0; /* Adjust the margin to your preference */
+}

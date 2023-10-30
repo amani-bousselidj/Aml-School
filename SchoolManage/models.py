@@ -20,7 +20,7 @@ class CustomUser(AbstractUser):
         # Add more roles as needed
     ]
     
-
+    profile_picture = models.ImageField(upload_to='profiles/', blank=True, null=True)
     # Custom fields
     role = models.CharField(max_length=10, choices=ROLE_CHOICES)
     telephone = models.CharField(max_length=15)
@@ -434,3 +434,34 @@ class ShoppingCart(models.Model):
     Date_create= models.DateField(auto_now=True)
     def __str__(self):
         return f'{self.user} Cart'
+class GeneralSettings(models.Model):
+    site_name = models.CharField(max_length=255, blank=True, null=True)
+    phone = models.CharField(max_length=20, blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
+    facebook = models.URLField(blank=True, null=True)
+    twitter = models.URLField(blank=True, null=True)
+    youtube = models.URLField(blank=True, null=True)
+    instagram = models.URLField(blank=True, null=True)
+    tiktok = models.URLField(blank=True, null=True)
+    snapchat = models.URLField(blank=True, null=True)
+    linkedin = models.URLField(blank=True, null=True)
+    work_time = models.CharField(max_length=100, blank=True, null=True)
+    google_map_link = models.URLField(blank=True, null=True)
+    google_map_iframe = models.TextField(blank=True, null=True)
+    address = models.TextField(blank=True, null=True)
+    login_timeout = models.PositiveIntegerField(blank=True, null=True)
+    about_small = models.TextField(blank=True, null=True)
+    logo = models.ImageField(upload_to='logos/', blank=True, null=True)
+    favicon = models.ImageField(upload_to='favicons/', blank=True, null=True)
+    seo_keywords = models.TextField(blank=True, null=True)
+    seo_description = models.TextField(blank=True, null=True)
+    privacy_policy = models.TextField(blank=True, null=True)
+    terms_conditions = models.TextField(blank=True, null=True)
+    head_tag = models.TextField(blank=True, null=True)
+    footer_tag = models.TextField(blank=True, null=True)
+    class Meta:
+        verbose_name = "General Settings"
+
+    def __str__(self):
+        return "General Settings"
+    

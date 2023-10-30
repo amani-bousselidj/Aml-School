@@ -1,12 +1,20 @@
 from django.contrib import admin
 from .models import *
-from django.contrib.auth.models import User
-
+# from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.conf import settings
+from django.core.files.storage import default_storage as storage
 class CustomUserAdmin(admin.ModelAdmin):
-    list_display = ('username', 'first_name', 'last_name', 'email', 'role', 'telephone', 'gender', 'birthday', 'address', 'marital_status')
+    list_display = ('username', 'first_name', 'last_name', 'email', 'role', 'telephone', 'gender', 'birthday', 'address', 'marital_status','profile_picture_thumbnail')
     list_filter = ('role', 'gender', 'marital_status')
     search_fields = ('username', 'first_name', 'last_name', 'email', 'telephone')
+    def profile_picture_thumbnail(self, obj):
+        if obj.profile_picture:
+            return format_html('<img src="{}" width="30" style="border-radius: 50%;" />', obj.profile_picture.url)
+        return format_html('<img src="{}" width="30" style="border-radius: 50%;" />', '/static/admin/img/avatar2.svg')
 
+    profile_picture_thumbnail.short_description = 'Profile Picture'
 class StudentAdmin(admin.ModelAdmin):
     list_display = ('formatted_admission_number', 'student_name', 'class_name', 'birthday', 'gender', 'mobile_phone_number')
     list_filter = ('gender', 'class_name')
@@ -154,4 +162,62 @@ admin.site.register(SubmitedHomworks)
 admin.site.register(ShoppingCart)
 admin.site.register(Order)
 admin.site.register(VideoLesson,VediolessonAdmin)
-# admin.site.register(Rating)
+from django.contrib import admin
+from .models import GeneralSettings
+from .forms import GeneralSettingsForm
+from django.utils.html import format_html
+
+@admin.register(GeneralSettings)
+class GeneralSettingsAdmin(admin.ModelAdmin):
+    # List all fields in list_display
+    list_display = (
+        'display_logo',
+        'site_name',
+        'phone',
+        'email',
+        # 'facebook',
+        # 'twitter',
+        # 'youtube',
+        # 'instagram',
+        # 'tiktok',
+        # 'snapchat',
+        # 'linkedin',
+        # 'work_time',
+        # 'google_map_link',
+        # 'google_map_iframe',
+        'address',
+        # 'login_timeout',
+        # 'about_small',
+        # 'seo_keywords',
+        # 'seo_description',
+        # 'privacy_policy',
+        # 'terms_conditions',
+        # 'head_tag',
+        # 'footer_tag'
+    )
+
+    # Define a custom method to display the logo image
+    def display_logo(self, obj):
+        if obj.logo:
+            return format_html('<img src="{}" width="50" />', obj.logo.url)
+        return "No Logo"
+
+    display_logo.short_description = 'Logo'
+
+    # Disable actions like "delete" to prevent accidental changes
+    actions = None
+
+    # Define a custom action for updating settings
+
+
+    # Disable the "Add" permission for GeneralSettings
+    def has_add_permission(self, request):
+        return False
+@receiver(post_save, sender=GeneralSettings)
+def update_site_logo(sender, instance, **kwargs):
+    if instance.logo:
+        # Update the site logo in Django settings
+        settings.SITE_LOGO_URL = storage.url(instance.logo.name)
+    else:
+        # Use a default logo URL if no logo is set
+        settings.SITE_LOGO_URL = '/static/admin/img/about-image-02.png'
