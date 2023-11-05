@@ -31,7 +31,9 @@ ALLOWED_HOSTS = ['*','aml-school.onrender.com']
 CORS_ALLOW_ALL_ORIGINS = False# Application definition
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",  # For development
+    "http://localhost:5173", 
+      'http://127.0.0.1',
+     "http://0.0.0.0", # For development
    "https://aml-school.onrender.com" # For production
 ]
 # CORS_ALLOW_ORIGIN_WHITELIST = [
@@ -64,7 +66,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
             'corsheaders.middleware.CorsMiddleware',
-
+ 'SchoolManage.middleware.AdminLogoutMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -173,14 +175,23 @@ REST_FRAMEWORK = {
     ],
 
 }
+# def get_dynamic_site_logo(context):
+#     from SchoolManage.models import GeneralSettings  # Import inside the function
 
-
+#     general_settings = GeneralSettings.objects.first()
+#     if general_settings and general_settings.logo:
+#         return general_settings.logo.url
+#     return '/static/admin/img/about-image-02.png'  # Default logo URL
+# from .admin_settings import get_dynamic_site_logo
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',  # Default ModelBackend
     # Add any custom backends if needed
 ]
 SITE_LOGO_URL = '/static/admin/img/about-image-02.png'  # Default logo URL
 JAZZMIN_SETTINGS = {
+    # "site_logo": get_dynamic_site_logo,
+#  "site": "your_project_name.admin.custom_admin_site",  # Use the custom admin site
+    "site_title": "Aml School",
      "related_modal_active": False,
     "custom_css": "/static/css/custom_admin.css",
     "topmenu_links": [
@@ -200,9 +211,13 @@ JAZZMIN_SETTINGS = {
     ],
     # "site_title": "Aml School",
     # "site_header": "{{ settings.SITE_HEADER }}",
-    # "site_logo": "{{ settings.SITE_LOGO_URL }}",
-        "navigation_expanded": True,
+    # "site_logo": get_dynamic_site_logo,
+                    "navigation_expanded": True,
     "copyright": "Aml School",
     "changeform_format": "horizontal_tabs",
     "changeform_format_overrides": {"auth.user": "collapsible", "auth.group": "vertical_tabs"},
 }
+
+
+MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_URL = '/media/'

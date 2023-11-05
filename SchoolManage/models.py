@@ -5,6 +5,19 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from django.contrib.auth.models import Permission
+
+
+
+class Countries(models.Model):
+    name = models.CharField( max_length=50)
+    Date_Created = models.DateField( auto_now=False, auto_now_add=False)
+    countrie_flag = models.ImageField(upload_to='countries_flags/', height_field=None, width_field=None, max_length=None)
+
+    class Meta:
+         verbose_name = "Countries"
+    def __str__(self):
+        return self.name
 class CustomUser(AbstractUser):
     # Choices for the role field
     ROLE_CHOICES = [
@@ -17,7 +30,7 @@ class CustomUser(AbstractUser):
         ('male', 'Male'),
         ('Female', 'Female'),
        
-        # Add more roles as needed
+     
     ]
     
     profile_picture = models.ImageField(upload_to='profiles/', blank=True, null=True)
@@ -27,10 +40,9 @@ class CustomUser(AbstractUser):
     gender = models.CharField(max_length=10,choices=GENDER_CHOICES)
     birthday = models.DateField(default=None,blank=True,null=True)
     address = models.TextField(default=None,blank=True,null=True)
-    
-  
+    country = models.ForeignKey('SchoolManage.Countries', on_delete=models.SET_NULL, null=True, blank=True)
     marital_status = models.CharField(max_length=20, blank=True, null=True)
-    is_active = models.BooleanField(default=False)
+    # is_active = models.BooleanField(default=False)
 
     @property
     def teacher(self):
@@ -51,7 +63,18 @@ def save_teacher_profile(sender, instance, **kwargs):
     if instance.role == 'teacher':
         if hasattr(instance, 'teacher'):
             instance.teacher.save()
+class CustomPermission(models.Model):
+    user = models.ManyToManyField(CustomUser)
+    permission = models.ManyToManyField(Permission)
+    def __str__(self):
+        user_names = ', '.join(user.username for user in self.user.all())
+        permission_names = ', '.join(permission.name for permission in self.permission.all())
+        return f'CustomPermission: Users - {user_names}, Permissions - {permission_names}'
 
+    
+    class Meta:
+        verbose_name = "Roles and permissions"
+        
 class Student(models.Model):
       # Optional field for teachers
     GENDER_CHOICES = [
@@ -83,6 +106,13 @@ class Parent(models.Model):
         return self.Parent_name or str(self.user)
 
 class Teacher(models.Model):
+    GENDER_CHOICES = [
+        ('male', 'Male'),
+        ('Female', 'Female'),
+       
+     
+    ]
+    
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
     personnel_id = models.CharField(max_length=20,blank=True,null=True)
     role_teacher = models.CharField(max_length=50,blank=True)
@@ -96,7 +126,7 @@ class Teacher(models.Model):
     barcode = models.CharField(max_length=20,blank=True,null=True)
     telephone = models.CharField(max_length=15,blank=True,null=True)
     email = models.EmailField(blank=True,null=True)
-    gender = models.CharField(max_length=10,null=True)
+    gender = models.CharField(max_length=10,null=True,choices=GENDER_CHOICES)
     birthday = models.DateField(blank=True,null=True)
     marital_status = models.CharField(max_length=20,blank=True,null=True)
     address = models.TextField(blank=True,null=True)
@@ -445,7 +475,7 @@ class GeneralSettings(models.Model):
     tiktok = models.URLField(blank=True, null=True)
     snapchat = models.URLField(blank=True, null=True)
     linkedin = models.URLField(blank=True, null=True)
-    work_time = models.CharField(max_length=100, blank=True, null=True)
+    work_time = models.IntegerField(blank=True, null=True)
     google_map_link = models.URLField(blank=True, null=True)
     google_map_iframe = models.TextField(blank=True, null=True)
     address = models.TextField(blank=True, null=True)
@@ -465,3 +495,7 @@ class GeneralSettings(models.Model):
     def __str__(self):
         return "General Settings"
     
+
+
+
+         

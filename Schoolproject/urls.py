@@ -21,7 +21,7 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('',include('SchoolManage.urls')),
+    path('api/',include('SchoolManage.urls')),
    
 ]
 if settings.DEBUG:

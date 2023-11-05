@@ -5,14 +5,24 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.conf import settings
 from django.core.files.storage import default_storage as storage
+from django.contrib.auth import get_user_model  # Import the user model
+from django.contrib.auth.models import User, Permission
+
 class CustomUserAdmin(admin.ModelAdmin):
-    list_display = ('username', 'first_name', 'last_name', 'email', 'role', 'telephone', 'gender', 'birthday', 'address', 'marital_status','profile_picture_thumbnail')
-    list_filter = ('role', 'gender', 'marital_status')
+    list_display = ('username', 'first_name', 'last_name', 'user_country', 'email', 'role', 'telephone', 'gender', 'birthday', 'address', 'marital_status', 'profile_picture_thumbnail')
+    list_filter = ('role', 'gender', 'marital_status','country')
     search_fields = ('username', 'first_name', 'last_name', 'email', 'telephone')
+   
     def profile_picture_thumbnail(self, obj):
         if obj.profile_picture:
-            return format_html('<img src="{}" width="30" style="border-radius: 50%;" />', obj.profile_picture.url)
+            return format_html('<img src="{}" width="50" height="50" style="border-radius: 50%;" />', obj.profile_picture.url)
         return format_html('<img src="{}" width="30" style="border-radius: 50%;" />', '/static/admin/img/avatar2.svg')
+    def user_country(self, obj):
+        if obj.country:
+            flag_url = obj.country.countrie_flag.url
+            flag_html = f'<img src="{flag_url}" width="30" style="border-radius: 15%;" />'
+            return format_html(flag_html)
+        return "N/A"
 
     profile_picture_thumbnail.short_description = 'Profile Picture'
 class StudentAdmin(admin.ModelAdmin):
@@ -134,7 +144,24 @@ class CourseAdmin(admin.ModelAdmin):
     list_filter = ('assign_teacher', 'course_category', 'visibility')
     search_fields = ('title', 'assign_teacher__user__username', 'course_category__category_name')
     inlines = [CourseSectionInline]
+class CountriesAdmin(admin.ModelAdmin):
+     list_display = ('name', 'countrie_flag_picture','Date_Created')
+     def countrie_flag_picture(self, obj):
+        if obj.countrie_flag:
+            return format_html('<img src="{}" width="50" />', obj.countrie_flag.url)
+        return "No Logo"
+     
+from django.contrib import admin
+from django.contrib.auth.models import Permission
+from django.contrib import admin
+from django.contrib.auth.models import Permission
+from django.contrib.auth.models import User
 
+admin.site.register(CustomPermission)
+
+
+
+admin.site.register(Countries, CountriesAdmin)
 
 admin.site.register(CustomUser, CustomUserAdmin)
 admin.site.register(Student, StudentAdmin)
@@ -182,7 +209,7 @@ class GeneralSettingsAdmin(admin.ModelAdmin):
         # 'tiktok',
         # 'snapchat',
         # 'linkedin',
-        # 'work_time',
+        
         # 'google_map_link',
         # 'google_map_iframe',
         'address',
@@ -194,6 +221,7 @@ class GeneralSettingsAdmin(admin.ModelAdmin):
         # 'terms_conditions',
         # 'head_tag',
         # 'footer_tag'
+         'work_time',
     )
 
     # Define a custom method to display the logo image
@@ -221,3 +249,7 @@ def update_site_logo(sender, instance, **kwargs):
     else:
         # Use a default logo URL if no logo is set
         settings.SITE_LOGO_URL = '/static/admin/img/about-image-02.png'
+
+
+
+        
