@@ -1,5 +1,9 @@
 from django.contrib import admin
 from .models import *
+from django import forms
+from django.contrib import admin
+from .models import Role
+
 # from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -249,7 +253,83 @@ def update_site_logo(sender, instance, **kwargs):
     else:
         # Use a default logo URL if no logo is set
         settings.SITE_LOGO_URL = '/static/admin/img/about-image-02.png'
+from django.contrib import admin
+from django.contrib import admin
+from .models import Role
+from django import forms
 
+class CustomPermissionInline(admin.TabularInline):
+    model = CustomPermission
+    extra = 1
+class RoleAdminForm(forms.ModelForm):
+    class Meta:
+        model = Role
+        fields = '__all__'
 
+    def clean(self):
+        cleaned_data = super().clean()
+        custom_name = cleaned_data.get('custom_name')
 
-        
+        if custom_name:
+            # If custom_name is provided, use it as the name
+            self.instance.name = custom_name
+
+        return cleaned_data
+
+class RoleForm(forms.ModelForm):
+    class Meta:
+        model = Role
+        fields = '__all__'
+
+    def clean(self):
+        cleaned_data = super().clean()
+        name = cleaned_data.get('name')
+        custom_name = cleaned_data.get('custom_name')
+
+        if name and custom_name:
+            raise forms.ValidationError("You can't provide both a predefined name and a custom name.")
+
+        if not name and not custom_name:
+            raise forms.ValidationError("You need to provide either a predefined name or a custom name.")
+
+from django.urls import reverse
+from django.utils.html import format_html
+
+class RoleAdmin(admin.ModelAdmin):
+    list_display = ['display_name', 'update_role', 'view_role', 'delete_role']
+    form = RoleForm
+
+    def display_name(self, obj):
+        return obj.name or obj.custom_name
+
+    display_name.short_description = 'Name'
+
+    def update_role(self, obj):
+        update_url = reverse('admin:SchoolManage_role_change', args=[obj.id])
+        return format_html(
+            '<a href="{}">'
+            '<i class="fas fa-edit" aria-hidden="true" title="Update"></i></a>'.format(update_url)
+        )
+
+    update_role.short_description = 'Update'
+
+    def view_role(self, obj):
+        view_url = reverse('admin:SchoolManage_role_changelist') + f'{obj.id}/'
+        return format_html(
+            '<a href="{}">'
+            '<i class="fas fa-eye" style="color:#6610F2" aria-hidden="true" title="View"></i></a>'.format(view_url)
+        )
+
+    view_role.short_description = 'View'
+
+    def delete_role(self, obj):
+        delete_url = reverse('admin:SchoolManage_role_delete', args=[obj.id])
+        return format_html(
+            '<a href="{}">'
+            '<i class="fas fa-trash" style="color:red"  aria-hidden="true" title="Delete"></i></a>'.format(delete_url)
+        )
+
+    delete_role.short_description = 'Delete'
+    inlines = [CustomPermissionInline]
+
+admin.site.register(Role, RoleAdmin)

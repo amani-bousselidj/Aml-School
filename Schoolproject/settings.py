@@ -39,7 +39,7 @@ CORS_ALLOWED_ORIGINS = [
 # CORS_ALLOW_ORIGIN_WHITELIST = [
 #     "http://localhost:5173",  # Add your React frontend URL
 # ]
-CSRF_COOKIE_SAMESITE = 'Lax'  # For production
+CSRF_COOKIE_SAMESITE = 'None'  # For production
 
 
 CORS_ALLOW_CREDENTIALS= True  # For development; in production, specify your frontend's origin.
@@ -136,6 +136,19 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+CKEDITOR_CONFIGS = {
+    'default': {
+        'toolbar': 'Custom',
+        'toolbar_Custom': [
+            ['Bold', 'Italic', 'Underline'],
+            ['NumberedList', 'BulletedList', 'Blockquote'],
+            ['Link', 'Unlink', 'Anchor'],
+            ['Source']
+        ],
+        'height': 300,
+        'width': 600,
+    },
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
@@ -196,28 +209,78 @@ JAZZMIN_SETTINGS = {
     "site_title": "Aml School",
      "related_modal_active": False,
     "custom_css": "/static/css/custom_admin.css",
-    "topmenu_links": [
+     "search_model": ["SchoolManage.CustomUser","SchoolManage.Course"],
+     "search_app":["SchoolManage"],
+     "topmenu_links": [
 
         # Url that gets reversed (Permissions can be added)
-        {"name": "Home",  "url": "admin:index", "permissions": ["auth.view_user"]},
+        {"name": "Home",  "url": "admin:index", },
 
         # external url that opens in a new window (Permissions can be added)
-        # {"name": "Support", "url": "https://github.com/farridav/django-jazzmin/issues", "new_window": True},
 
         # model admin to link to (Permissions checked against model)
-        {"model": "auth.CustomUser"},
+        {"model": "SchoolManage.CustomUser"},
 
         # App with dropdown menu to all its models pages (Permissions checked against models)
-        {"app": "books"},
-
+        {"app": "SchoolManage"},
     ],
-    # "site_title": "Aml School",
-    # "site_header": "{{ settings.SITE_HEADER }}",
-    # "site_logo": get_dynamic_site_logo,
+     "usermenu_links": [
+      
+        {"model": "CustomUser"}
+    ],
+    "show_sidebar": True,
+    "navigation_expanded": True,
+        "related_modal_active": False,
+    "site_title": "Aml School",
+    "site_header": "Aml_School",
+    "site_brand": "Aml School",
+ "changeform_format": "single",
+    "site_logo": "images/photo_2023-11-11_10-56-40.jpg",
                     "navigation_expanded": True,
     "copyright": "Aml School",
     "changeform_format": "horizontal_tabs",
     "changeform_format_overrides": {"auth.user": "collapsible", "auth.group": "vertical_tabs"},
+
+"icons": {
+        "auth": "fas fa-users-cog",  # Icon for the authentication app
+        "auth.user": "fas fa-user",   # Icon for the User model
+        "auth.Group": "fas fa-users",  # Icon for the Group model
+        "SchoolManage.Role": "fas fa-user-graduate",  # Icon for the Role model
+        "SchoolManage.Countries": "fas fa-globe",  # Icon for the Countries model
+        "SchoolManage.CustomUser": "fas fa-user",  # Icon for the CustomUser model
+        "SchoolManage.Student": "fas fa-user-graduate",  # Icon for the Student model
+        "SchoolManage.Parent": "fas fa-user-friends",  # Icon for the Parent model
+        "SchoolManage.Teacher": "fas fa-chalkboard-teacher",  # Icon for the Teacher model
+        "SchoolManage.CourseCategory": "fas fa-folder",  # Icon for the CourseCategory model
+        "SchoolManage.Subject": "fas fa-book",  # Icon for the Subject model
+        "SchoolManage.Lesson": "fas fa-file-alt",  # Icon for the Lesson model
+        "SchoolManage.Quiz": "fas fa-question",  # Icon for the Quiz model
+        "SchoolManage.Course": "fas fa-graduation-cap",  # Icon for the Course model
+        "SchoolManage.VideoLesson": "fas fa-video",  # Icon for the VideoLesson model
+        "SchoolManage.CourseSection": "fas fa-book-open",  # Icon for the CourseSection model
+        "SchoolManage.LessonOrder": "fas fa-list-ol",  # Icon for the LessonOrder model
+        "SchoolManage.Choice": "fas fa-list",  # Icon for the Choice model
+        "SchoolManage.Question": "fas fa-question-circle",  # Icon for the Question model
+        "SchoolManage.QuestionChoice": "fas fa-check-circle",  # Icon for the QuestionChoice model
+        "SchoolManage.Syllabus": "fas fa-calendar-alt",  # Icon for the Syllabus model
+        "SchoolManage.LiveMeeting": "fas fa-video",  # Icon for the LiveMeeting model
+        "SchoolManage.Class": "fas fa-school",  # Icon for the Class model
+        "SchoolManage.Section": "fas fa-cube",  # Icon for the Section model
+        "SchoolManage.ExamResult": "fas fa-poll",  # Icon for the ExamResult model
+        "SchoolManage.LessonPlan": "fas fa-file-alt",  # Icon for the LessonPlan model
+        "SchoolManage.Homework": "fas fa-book-open",  # Icon for the Homework model
+        "SchoolManage.SubmitedHomworks": "fas fa-upload",  # Icon for the SubmitedHomworks model
+        "SchoolManage.OnlineExam": "fas fa-tasks",  # Icon for the OnlineExam model
+        "SchoolManage.StudentAttempt": "fas fa-pencil-alt",  # Icon for the StudentAttempt model
+        "SchoolManage.StudentAnswer": "fas fa-check",  # Icon for the StudentAnswer model
+        "SchoolManage.StudentProgress": "fas fa-tasks",  # Icon for the StudentProgress model
+        "SchoolManage.Certificate": "fas fa-certificate",  # Icon for the Certificate model
+        "SchoolManage.Rating": "fas fa-star",  # Icon for the Rating model
+        "SchoolManage.Order": "fas fa-shopping-cart",  # Icon for the Order model
+        "SchoolManage.Payment": "fas fa-money-check",  # Icon for the Payment model
+        "SchoolManage.ShoppingCart": "fas fa-shopping-cart",  # Icon for the ShoppingCart model
+        "SchoolManage.GeneralSettings": "fas fa-cogs",  # Icon for the GeneralSettings model
+    },
 }
 JAZZMIN_SETTINGS["show_ui_builder"] = True
 JAZZMIN_UI_TWEAKS = {

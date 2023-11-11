@@ -1,4 +1,4 @@
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser,Group
 from django.db import models
 import uuid
 from django.db.models.signals import post_save
@@ -8,7 +8,43 @@ from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import Permission
 
 
+from ckeditor.fields import RichTextField
 
+from django.db import models
+
+class Role(models.Model):
+    ROLE_CHOICES = [
+        ('Student', 'Student'),
+        ('Teacher', 'Teacher'),
+        ('Parent', 'Parent'),
+    ]
+
+    name = models.CharField(
+        max_length=50,
+        choices=ROLE_CHOICES, 
+        blank=True ,
+        unique=True,# Keep the predefined choices
+    )
+
+    custom_name = models.CharField(
+        max_length=50,
+        blank=True,  # Allow it to be empty
+        null=True,   # Allow it to be null
+        unique=True, # Ensure uniqueness
+    )
+    def save(self, *args, **kwargs):
+        if not self.name and self.custom_name:
+            self.name = self.custom_name
+        super(Role, self).save(*args, **kwargs)
+    
+    def __str__(self):
+        return self.custom_name if self.custom_name else self.name # Return the display value of the predefined choices
+
+    @classmethod
+    def create_custom_role(cls, custom_name):
+        if custom_name:
+            return cls.objects.create(custom_name=custom_name)
+        return None
 class Countries(models.Model):
     name = models.CharField( max_length=50)
     Date_Created = models.DateField( auto_now=False, auto_now_add=False)
@@ -20,12 +56,7 @@ class Countries(models.Model):
         return self.name
 class CustomUser(AbstractUser):
     # Choices for the role field
-    ROLE_CHOICES = [
-        ('Student', 'Student'),
-        ('Parent', 'Parent'),
-        ('Teacher', 'Teacher'),
-        # Add more roles as needed
-    ]
+   
     GENDER_CHOICES = [
         ('male', 'Male'),
         ('Female', 'Female'),
@@ -35,7 +66,7 @@ class CustomUser(AbstractUser):
     
     profile_picture = models.ImageField(upload_to='profiles/', blank=True, null=True)
     # Custom fields
-    role = models.CharField(max_length=10, choices=ROLE_CHOICES)
+    role = models.ForeignKey(Role, on_delete=models.SET_NULL, null=True, blank=True)
     telephone = models.CharField(max_length=15)
     gender = models.CharField(max_length=10,choices=GENDER_CHOICES)
     birthday = models.DateField(default=None,blank=True,null=True)
@@ -64,12 +95,14 @@ def save_teacher_profile(sender, instance, **kwargs):
         if hasattr(instance, 'teacher'):
             instance.teacher.save()
 class CustomPermission(models.Model):
-    user = models.ManyToManyField(CustomUser)
+    role = models.ForeignKey(Role, on_delete=models.CASCADE,default=None,null=True)
     permission = models.ManyToManyField(Permission)
     def __str__(self):
-        user_names = ', '.join(user.username for user in self.user.all())
-        permission_names = ', '.join(permission.name for permission in self.permission.all())
-        return f'CustomPermission: Users - {user_names}, Permissions - {permission_names}'
+     if self.role.custom_name:
+        return f'{self.role.custom_name} - Permissions'
+     else:
+        return f'{self.role.name} - Permissions'
+
 
     
     class Meta:

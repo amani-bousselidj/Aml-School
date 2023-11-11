@@ -1,9 +1,0 @@
-{% extends "admin/base.html" %}
-
-{% block userlinks %}
-  <ul class="userlinks">
-    <li><a href="{% url 'admin:password_change' %}">Change password</a></li>
-    <li><a href="{% url 'admin:logout' %}">Log out</a></li>
-    <li><img src="{{ user.profile_picture.url }}" width="30" height="30" style="border-radius: 50%;" alt="{{ user.username }}" /></li>
-  </ul>
-{% endblock %}

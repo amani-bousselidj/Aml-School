@@ -1052,6 +1052,17 @@ class CreateCourseWithSectionsQuizzesLessonsView(generics.ListCreateAPIView):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+# from django.shortcuts import render, redirect
+# from .models import Role
+
+# def add_role(modeladmin, request, queryset):
+#     if request.method == 'POST':
+#         role_name = request.POST.get('name')
+#         if role_name:
+#             Role.objects.create(name=role_name)
+#             return redirect('admin:SchoolManage_role_changelist')  # Redirect to the list view
+
+#     return render(request, 'admin/add_role_form.html')
 
 
 # def index(request):
