@@ -28,11 +28,11 @@ CORS_ALLOW_HEADERS = ['*']
 CORS_ALLOW_METHODS = ['*']
 CSRF_COOKIE_SAMESITE = 'None'
 ALLOWED_HOSTS = ['*','aml-school.onrender.com']
-CORS_ALLOW_ALL_ORIGINS = False# Application definition
+CORS_ALLOW_ALL_ORIGINS = True# Application definition
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173", 
-      'http://127.0.0.1',
+    'http://127.0.0.1',
      "http://0.0.0.0", # For development
    "https://aml-school.onrender.com" # For production
 ]
@@ -301,6 +301,7 @@ JAZZMIN_SETTINGS = {
         "SchoolManage.GeneralSettings": "fas fa-cogs",  # Icon for the GeneralSettings model
     },
 }
+<<<<<<< HEAD
 JAZZMIN_SETTINGS["show_ui_builder"] = True
 JAZZMIN_UI_TWEAKS = {
     "navbar_small_text": False,
@@ -333,5 +334,16 @@ JAZZMIN_UI_TWEAKS = {
         "success": "btn-success"
     }
 }
+<<<<<<< HEAD
 MEDIA_ROOT = os.path.join(BASE_DIR, 'Schoolproject/media')
 MEDIA_URL = 'Schoolproject/media/'
+=======
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
+=======
+
+
+MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_URL = '/media/'
+>>>>>>> ab2eab1 (Committing local changes)
+>>>>>>> a512637a (new commit settings)
