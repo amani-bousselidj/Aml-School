@@ -63,6 +63,8 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+        'django.middleware.locale.LocaleMiddleware',
+
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
             'corsheaders.middleware.CorsMiddleware',
@@ -98,6 +100,8 @@ TEMPLATES = [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
+                                'django.template.context_processors.i18n',
+
                 'django.contrib.messages.context_processors.messages',
             ],
         },
@@ -154,12 +158,21 @@ CKEDITOR_CONFIGS = {
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
+LANGUAGES = [
+     ('en', ('English')),
+    ('ar', ('Arabic')),
+    ('fr', ('French')),
+ ]
 
 TIME_ZONE = 'UTC'
 
 USE_I18N = True
-
+LOCALE_PATHS = (os.path.join(BASE_DIR, "locale"),)
 USE_TZ = True
+
+
+USE_I18N = True
+
 
 
 # Static files (CSS, JavaScript, Images)
@@ -203,7 +216,7 @@ AUTHENTICATION_BACKENDS = [
 SITE_LOGO_URL = '/static/admin/img/about-image-02.png' 
   # Default logo URL
 JAZZMIN_SETTINGS = {
-    
+    "language_chooser": True,
     # "site_logo": get_dynamic_site_logo,
 #  "site": "your_project_name.admin.custom_admin_site",  # Use the custom admin site
     "site_title": "Aml School",
@@ -314,5 +327,5 @@ JAZZMIN_UI_TWEAKS = {
         "success": "btn-success"
     }
 }
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'Schoolproject/media')
+MEDIA_URL = 'Schoolproject/media/'

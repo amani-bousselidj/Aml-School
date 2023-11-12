@@ -51,7 +51,7 @@ class Countries(models.Model):
     countrie_flag = models.ImageField(upload_to='countries_flags/', height_field=None, width_field=None, max_length=None)
 
     class Meta:
-         verbose_name = "Countries"
+         verbose_name = "Countrie"
     def __str__(self):
         return self.name
 class CustomUser(AbstractUser):
