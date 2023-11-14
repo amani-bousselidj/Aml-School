@@ -57,7 +57,7 @@ INSTALLED_APPS = [
      'rest_framework.authtoken',
       'ckeditor',
       'corsheaders',
-
+    'rolepermissions',
 ]
 
 MIDDLEWARE = [
@@ -167,7 +167,9 @@ LANGUAGES = [
 TIME_ZONE = 'UTC'
 
 USE_I18N = True
-LOCALE_PATHS = (os.path.join(BASE_DIR, "locale"),)
+LOCALE_PATHS = [
+    os.path.join(BASE_DIR, 'locale'),
+]
 USE_TZ = True
 
 

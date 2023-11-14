@@ -1,9 +1,10 @@
+from django.utils.translation import gettext as _
+
 from django.contrib import admin
 from .models import *
 from django import forms
 from django.contrib import admin
 from .models import Role
-
 # from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -161,7 +162,7 @@ from django.contrib import admin
 from django.contrib.auth.models import Permission
 from django.contrib.auth.models import User
 
-admin.site.register(CustomPermission)
+# admin.site.register(CustomPermission)
 
 
 
@@ -295,41 +296,218 @@ class RoleForm(forms.ModelForm):
 from django.urls import reverse
 from django.utils.html import format_html
 
+# class RoleAdmin(admin.ModelAdmin):
+#     list_display = ['display_name', 'update_role', 'view_role', 'delete_role']
+#     form = RoleForm
+
+#     def display_name(self, obj):
+#         return obj.name or obj.custom_name
+
+#     display_name.short_description = 'Name'
+
+#     def update_role(self, obj):
+#         update_url = reverse('admin:SchoolManage_role_change', args=[obj.id])
+#         return format_html(
+#             '<a href="{}">'
+#             '<i class="fas fa-edit" aria-hidden="true" title="Update"></i></a>'.format(update_url)
+#         )
+
+#     update_role.short_description = 'Update'
+
+#     def view_role(self, obj):
+#         view_url = reverse('admin:SchoolManage_role_changelist') + f'{obj.id}/'
+#         return format_html(
+#             '<a href="{}">'
+#             '<i class="fas fa-eye" style="color:#6610F2" aria-hidden="true" title="View"></i></a>'.format(view_url)
+#         )
+
+#     view_role.short_description = 'View'
+
+#     def delete_role(self, obj):
+#         delete_url = reverse('admin:SchoolManage_role_delete', args=[obj.id])
+#         return format_html(
+#             '<a href="{}">'
+#             '<i class="fas fa-trash" style="color:red"  aria-hidden="true" title="Delete"></i></a>'.format(delete_url)
+#         )
+
+#     delete_role.short_description = 'Delete'
+#     inlines = [CustomPermissionInline]
+
+# admin.site.register(Role, RoleAdmin)
+
+# from django.contrib import admin
+# from django.contrib.admin import TabularInline
+# from .models import Role, CustomPermission
+
+# class CustomPermissionInline(admin.TabularInline):
+#     model = CustomPermission
+#     extra = 0  # Set the number of empty forms to display
+
+# class RoleAdmin(admin.ModelAdmin):
+#     list_display = ('name', 'custom_name')
+#     inlines = [CustomPermissionInline]
+# from django import forms
+# from django.contrib import admin
+# from django.contrib.auth.models import Permission
+# from django.contrib.contenttypes.models import ContentType
+# from django.utils.html import format_html
+# from .models import Role, CustomPermission
+
+# class CustomPermissionInline(admin.TabularInline):
+#     model = CustomPermission
+#     extra = 0
+
+# @admin.register(Role)
+# class RoleAdmin(admin.ModelAdmin):
+#     list_display = ('custom_name', 'name', 'view_permissions')
+#     inlines = [CustomPermissionInline]
+
+#     def get_form(self, request, obj=None, **kwargs):
+#         self.request = request  # Make the request object available within the class
+#         return super().get_form(request, obj, **kwargs)
+
+#     def view_permissions(self, obj):
+#         # Fetch all content types for your models
+#         content_types = ContentType.objects.exclude(app_label='auth')  # Exclude Django models
+
+#         # Create a dictionary to store permissions for each model
+#         permissions_dict = {}
+
+#         # Update permissions based on your logic
+#         if self.request.method == 'POST':
+#             for content_type in content_types:
+#                 model_name = content_type.model
+
+#                 can_view = self.request.POST.get(f'{model_name}_can_view')
+#                 can_add = self.request.POST.get(f'{model_name}_can_add')
+#                 can_change = self.request.POST.get(f'{model_name}_can_change')
+#                 can_delete = self.request.POST.get(f'{model_name}_can_delete')
+
+#                 permissions = []
+
+#                 if can_view:
+#                     permissions.append('Can View')
+#                 if can_add:
+#                     permissions.append('Can Add')
+#                 if can_change:
+#                     permissions.append('Can Change')
+#                 if can_delete:
+#                     permissions.append('Can Delete')
+
+#                 permissions_dict[model_name] = permissions
+
+#         # Format permissions for display and editing
+#         permissions_table = '<form method="POST">'
+#         permissions_table += '<table>'
+#         permissions_table += '<tr><th>Model</th><th>Can View</th><th>Can Add</th><th>Can Change</th><th>Can Delete</th></tr>'
+#         for model, permissions in permissions_dict.items():
+#             permissions_table += f'<tr><td>{model}</td>'
+#             for action in ['can_view', 'can_add', 'can_change', 'can_delete']:
+#                 is_allowed = action in permissions
+#                 permissions_table += f'<td><input type="checkbox" name="{model}_{action}" {"checked" if is_allowed else ""}></td>'
+#             permissions_table += '</tr>'
+#         permissions_table += '</table>'
+#         permissions_table += '<input type="submit" value="Save">'
+#         permissions_table += '</form>'
+
+#         return format_html(permissions_table)
+
+#     view_permissions.short_description = 'Permissions'
+
+# # Register the Permission model
+# admin.site.register(Permission)
+from django import forms
+from django.contrib import admin
+from django.contrib.auth import get_user_model
+from django.apps import apps
+from django.contrib.contenttypes.models import ContentType
+from .models import Role, Permission
+
+class PermissionInline(admin.TabularInline):
+    model = Permission
+    extra = 1
+from django import forms
+from django.contrib import admin
+from django.contrib.auth import get_user_model
+from django.apps import apps
+from django.contrib.contenttypes.models import ContentType
+from .models import Role, Permission
+
+class PermissionInline(admin.TabularInline):
+    model = Permission
+    extra = 1
+    fields = ['service_name', 'can_view', 'can_add', 'can_change', 'can_delete']
+
+    def get_model_choices(self):
+        models = apps.get_models()
+        return [(model._meta.object_name, model._meta.object_name) for model in models]
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "service_name":
+            kwargs['queryset'] = Permission.objects.none()
+            kwargs['widget'] = admin.widgets.ForeignKeyRawIdWidget(db_field.remote_field, admin.site, using=kwargs.get("using"))
+            kwargs['choices'] = self.get_model_choices()
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+from django.contrib import admin
+from .models import Role, Permission
+from django.apps import apps
+
+class PermissionInline(admin.TabularInline):
+    model = Permission
+    extra = 1
+
+@admin.register(Role)
 class RoleAdmin(admin.ModelAdmin):
-    list_display = ['display_name', 'update_role', 'view_role', 'delete_role']
-    form = RoleForm
+    list_display = ('display_name', 'permissions_preview')  # Replace 'name' with 'display_name'
+    inlines = [PermissionInline]
 
     def display_name(self, obj):
-        return obj.name or obj.custom_name
+        return obj.custom_name or obj.name  # Display custom_name if available, else display name
 
-    display_name.short_description = 'Name'
+    display_name.short_description = 'Role Name'
 
-    def update_role(self, obj):
-        update_url = reverse('admin:SchoolManage_role_change', args=[obj.id])
-        return format_html(
-            '<a href="{}">'
-            '<i class="fas fa-edit" aria-hidden="true" title="Update"></i></a>'.format(update_url)
-        )
+    def permissions_preview(self, obj):
+        permissions = Permission.objects.filter(role=obj)
+        preview = []
+        for permission in permissions:
+            service_name = permission.service_name
+            actions = []
+            if permission.can_view:
+                actions.append('View')
+            if permission.can_add:
+                actions.append('Add')
+            if permission.can_change:
+                actions.append('Change')
+            if permission.can_delete:
+                actions.append('Delete')
+            preview.append(f"{service_name}: {', '.join(actions)}")
+        return ' '.join(preview)
 
-    update_role.short_description = 'Update'
+    permissions_preview.short_description = 'Permissions Preview'
 
-    def view_role(self, obj):
-        view_url = reverse('admin:SchoolManage_role_changelist') + f'{obj.id}/'
-        return format_html(
-            '<a href="{}">'
-            '<i class="fas fa-eye" style="color:#6610F2" aria-hidden="true" title="View"></i></a>'.format(view_url)
-        )
+class PermissionInline(admin.TabularInline):
+    model = Permission
+    extra = 1
 
-    view_role.short_description = 'View'
+@admin.register(Permission)
+class PermissionAdmin(admin.ModelAdmin):
+    list_display = ('role', 'service_name', 'model_name', 'can_view', 'can_add', 'can_change', 'can_delete')
 
-    def delete_role(self, obj):
-        delete_url = reverse('admin:SchoolManage_role_delete', args=[obj.id])
-        return format_html(
-            '<a href="{}">'
-            '<i class="fas fa-trash" style="color:red"  aria-hidden="true" title="Delete"></i></a>'.format(delete_url)
-        )
+    def model_name(self, obj):
+        try:
+            model = apps.get_model(obj.service_name)
+            return model._meta.verbose_name_plural
+        except LookupError:
+            return "N/A"
 
-    delete_role.short_description = 'Delete'
-    inlines = [CustomPermissionInline]
+    model_name.short_description = 'Model Name'
 
-admin.site.register(Role, RoleAdmin)
+    def get_model_choices(self):
+        models = apps.get_models()
+        return [(model._meta.object_name, model._meta.object_name) for model in models]
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "service_name":
+            kwargs['queryset'] = Permission.objects.none()
+            kwargs['widget'] = admin.widgets.ForeignKeyRawIdWidget(db_field.remote_field, admin.site, using=kwargs.get("using"))
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
