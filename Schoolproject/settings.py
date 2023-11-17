@@ -57,7 +57,6 @@ INSTALLED_APPS = [
      'rest_framework.authtoken',
       'ckeditor',
       'corsheaders',
-    'rolepermissions',
 ]
 
 MIDDLEWARE = [
