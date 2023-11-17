@@ -161,4 +161,6 @@ cython_debug/
 .idea/
 
 static/
+staticfiles/
+media/
 db.sqlite3
