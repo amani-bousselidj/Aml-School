@@ -24,7 +24,7 @@ urlpatterns = [
         path("i18n/", include("django.conf.urls.i18n")),
 
     path('admin/', admin.site.urls),
-    
+        path("admin/", include('SchoolManage.urls')),
     path('api/',include('SchoolManage.urls')),
    
 ]

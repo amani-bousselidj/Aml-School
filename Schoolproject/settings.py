@@ -255,7 +255,11 @@ JAZZMIN_SETTINGS = {
     "copyright": "Aml School",
     "changeform_format": "horizontal_tabs",
     "changeform_format_overrides": {"auth.user": "collapsible", "auth.group": "vertical_tabs"},
+"hide_apps": ["SchoolManage","Auth","authtoken"],
 
+
+ "show_sidebar": True,
+    "navigation_expanded": False,
 "icons": {
         "auth": "fas fa-users-cog",  # Icon for the authentication app
         "auth.user": "fas fa-user",   # Icon for the User model

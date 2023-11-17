@@ -38,7 +38,7 @@ class StudentAdmin(admin.ModelAdmin):
     def formatted_admission_number(self, obj):
         return str(obj.admission_number)
     formatted_admission_number.short_description = 'Admission Number'
-
+   
 class ParentAdmin(admin.ModelAdmin):
     list_display = ('Parent_name', 'Parent_phone', 'Parent_occupation')
     search_fields = ('Parent_name', 'Parent_phone', 'Parent_occupation')
@@ -259,9 +259,9 @@ from django.contrib import admin
 from .models import Role
 from django import forms
 
-class CustomPermissionInline(admin.TabularInline):
-    model = CustomPermission
-    extra = 1
+# class CustomPermissionInline(admin.TabularInline):
+#     model = CustomPermission
+#     extra = 1
 class RoleAdminForm(forms.ModelForm):
     class Meta:
         model = Role
@@ -418,59 +418,44 @@ from django.utils.html import format_html
 # admin.site.register(Permission)
 from django import forms
 from django.contrib import admin
-from django.contrib.auth import get_user_model
-from django.apps import apps
 from django.contrib.contenttypes.models import ContentType
 from .models import Role, Permission
 
-class PermissionInline(admin.TabularInline):
-    model = Permission
-    extra = 1
-from django import forms
-from django.contrib import admin
-from django.contrib.auth import get_user_model
-from django.apps import apps
-from django.contrib.contenttypes.models import ContentType
-from .models import Role, Permission
+class ServiceNameWidget(forms.TextInput):
+    def render(self, name, value, attrs=None, renderer=None):
+        try:
+            instance = self.choices.queryset.get(pk=value)
+            model_name = instance.model
+            return model_name
+        except self.choices.queryset.model.DoesNotExist:
+            return str(value)  # Fallback to displaying the raw value if the instance does not exist
+
 
 class PermissionInline(admin.TabularInline):
-    model = Permission
+    model = RolePermission
     extra = 1
     fields = ['service_name', 'can_view', 'can_add', 'can_change', 'can_delete']
 
-    def get_model_choices(self):
-        models = apps.get_models()
-        return [(model._meta.object_name, model._meta.object_name) for model in models]
-
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "service_name":
-            kwargs['queryset'] = Permission.objects.none()
-            kwargs['widget'] = admin.widgets.ForeignKeyRawIdWidget(db_field.remote_field, admin.site, using=kwargs.get("using"))
-            kwargs['choices'] = self.get_model_choices()
+            kwargs['widget'] = ServiceNameWidget()
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
-from django.contrib import admin
-from .models import Role, Permission
-from django.apps import apps
-
-class PermissionInline(admin.TabularInline):
-    model = Permission
-    extra = 1
 
 @admin.register(Role)
 class RoleAdmin(admin.ModelAdmin):
-    list_display = ('display_name', 'permissions_preview')  # Replace 'name' with 'display_name'
+    list_display = ('display_name', 'permissions_preview')  
     inlines = [PermissionInline]
 
     def display_name(self, obj):
-        return obj.custom_name or obj.name  # Display custom_name if available, else display name
+        return obj.custom_name or obj.name
 
     display_name.short_description = 'Role Name'
 
     def permissions_preview(self, obj):
-        permissions = Permission.objects.filter(role=obj)
+        permissions = RolePermission.objects.filter(role=obj)
         preview = []
         for permission in permissions:
-            service_name = permission.service_name
+            service_name = permission.get_service_name()  # Fix here
             actions = []
             if permission.can_view:
                 actions.append('View')
@@ -485,29 +470,4 @@ class RoleAdmin(admin.ModelAdmin):
 
     permissions_preview.short_description = 'Permissions Preview'
 
-class PermissionInline(admin.TabularInline):
-    model = Permission
-    extra = 1
 
-@admin.register(Permission)
-class PermissionAdmin(admin.ModelAdmin):
-    list_display = ('role', 'service_name', 'model_name', 'can_view', 'can_add', 'can_change', 'can_delete')
-
-    def model_name(self, obj):
-        try:
-            model = apps.get_model(obj.service_name)
-            return model._meta.verbose_name_plural
-        except LookupError:
-            return "N/A"
-
-    model_name.short_description = 'Model Name'
-
-    def get_model_choices(self):
-        models = apps.get_models()
-        return [(model._meta.object_name, model._meta.object_name) for model in models]
-
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        if db_field.name == "service_name":
-            kwargs['queryset'] = Permission.objects.none()
-            kwargs['widget'] = admin.widgets.ForeignKeyRawIdWidget(db_field.remote_field, admin.site, using=kwargs.get("using"))
-        return super().formfield_for_foreignkey(db_field, request, **kwargs)

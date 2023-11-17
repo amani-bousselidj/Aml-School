@@ -1,0 +1,28 @@
+{% extends "admin/index.html" %}
+
+{% block content %}
+    {% if user.is_active and user.is_staff %}
+        <div id="content-main">
+            {% for app in app_list %}
+                {% if app.name != 'SchoolManage' %}
+                    <div class="app-{{ app.name }} module">
+                        <table>
+                            <caption>
+                                <a href="{% url 'admin:app_list' app.app_label %}">{{ app.name }}</a>
+                            </caption>
+                            {% for model in app.models %}
+                                <tr class="model-{{ model.object_name|lower }}">
+                                    <th scope="row">
+                                        <a href="{% if model.admin_url %}{{ model.admin_url }}{% else %}{% url 'admin:app_list' app.app_label %}{% endif %}">
+                                            {{ model.name }}
+                                        </a>
+                                    </th>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endblock %}

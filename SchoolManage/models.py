@@ -1,12 +1,13 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, Permission as AuthPermission
+from django.contrib.contenttypes.models import ContentType
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from ckeditor.fields import RichTextField
 import uuid
-
+from django.core.exceptions import ValidationError
 class Role(models.Model):
     ROLE_CHOICES = [
         ('Student', 'Student'),
@@ -35,7 +36,7 @@ class Role(models.Model):
         super(Role, self).save(*args, **kwargs)
 
     def __str__(self):
-        return self.custom_name or self.custom_name 
+        return self.custom_name or self.name or str(self.pk)
 
     class Meta:
         verbose_name = _("Role")
@@ -637,16 +638,49 @@ class GeneralSettings(models.Model):
 
     def __str__(self):
         return "General Settings"
-    
-
-class Permission(models.Model):
+class RolePermission(models.Model):
     role = models.ForeignKey(Role, on_delete=models.CASCADE)
-    service_name = models.CharField(max_length=100)
+    service_name = models.ForeignKey(ContentType, on_delete=models.CASCADE,default=None,null=True)
     can_view = models.BooleanField(default=False)
     can_add = models.BooleanField(default=False)
     can_change = models.BooleanField(default=False)
     can_delete = models.BooleanField(default=False)
 
     class Meta:
+        verbose_name = _("Role Permission")
+        verbose_name_plural = _("Role Permissions")
+    def get_service_name(self):
+        return self.service_name.model 
+    @receiver(post_save, sender=Role)
+    def extend_permissions(sender, instance, **kwargs):
+     if instance.name in ['Student', 'Teacher', 'Parent']:
+        # Copy default permissions for Student, Teacher, Parent
+        default_permissions = RolePermission.objects.filter(role__name=instance.name)
+        for permission in default_permissions:
+            RolePermission.objects.get_or_create(
+                role=instance,
+                service_name=permission.service_name,
+                can_view=permission.can_view,
+                can_add=permission.can_add,
+                can_change=permission.can_change,
+                can_delete=permission.can_delete
+            )
+from django.contrib.contenttypes.models import ContentType
+from django.db import models
+
+class Permission(models.Model):
+    role = models.ForeignKey(Role, on_delete=models.CASCADE)
+    service_name = models.ForeignKey(ContentType, on_delete=models.CASCADE, related_name='permissions_for_service')
+    can_view = models.BooleanField(default=False)
+    can_add = models.BooleanField(default=False)
+    can_change = models.BooleanField(default=False)
+    can_delete = models.BooleanField(default=False)
+    def __str__(self):
+        return f'{self.role.name}-Permissions'
+    def get_service_name(self):
+        return self.service_name.model 
+    class Meta:
         verbose_name = _("Permission")
         verbose_name_plural = _("Permissions")
+
+    
