@@ -334,16 +334,10 @@ JAZZMIN_UI_TWEAKS = {
         "success": "btn-success"
     }
 }
-<<<<<<< HEAD
-MEDIA_ROOT = os.path.join(BASE_DIR, 'Schoolproject/media')
-MEDIA_URL = 'Schoolproject/media/'
-=======
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-MEDIA_URL = '/media/'
-=======
+
+
 
 
 MEDIA_ROOT = BASE_DIR / 'media'
 MEDIA_URL = '/media/'
->>>>>>> ab2eab1 (Committing local changes)
->>>>>>> a512637a (new commit settings)
+
