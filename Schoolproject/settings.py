@@ -301,7 +301,7 @@ JAZZMIN_SETTINGS = {
         "SchoolManage.GeneralSettings": "fas fa-cogs",  # Icon for the GeneralSettings model
     },
 }
-<<<<<<< HEAD
+
 JAZZMIN_SETTINGS["show_ui_builder"] = True
 JAZZMIN_UI_TWEAKS = {
     "navbar_small_text": False,
