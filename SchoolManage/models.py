@@ -8,6 +8,12 @@ from django.utils.translation import gettext_lazy as _
 from ckeditor.fields import RichTextField
 import uuid
 from django.core.exceptions import ValidationError
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.contrib.contenttypes.models import ContentType
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+
 class Role(models.Model):
     ROLE_CHOICES = [
         ('Student', 'Student'),
@@ -29,7 +35,7 @@ class Role(models.Model):
         unique=True,
                 verbose_name='Custom Role',  # Add verbose name for 'custom_name'
     )
-
+    
     def save(self, *args, **kwargs):
         if not self.name and self.custom_name:
             self.name = self.custom_name
@@ -42,12 +48,32 @@ class Role(models.Model):
         verbose_name = _("Role")
         verbose_name_plural = _("Roles")
 
-    @classmethod
-    def create_custom_role(cls, custom_name):
-        if custom_name:
-            return cls.objects.create(custom_name=custom_name)
-        return None
+    # @classmethod
+    # def create_custom_role(cls, custom_name, base_role_name):
+    #     if custom_name:
+    #         custom_role = cls.objects.create(custom_name=custom_name)
 
+    #         # Copy permissions from the base role to the custom role
+    #         base_role = cls.objects.get(name=base_role_name)
+    #         base_permissions = RolePermission.objects.filter(role=base_role)
+
+    #         for permission in base_permissions:
+    #             RolePermission.objects.create(
+    #                 role=custom_role,
+    #                 service_name=permission.service_name,
+    #                 can_view=permission.can_view,
+    #                 can_add=permission.can_add,
+    #                 can_change=permission.can_change,
+    #                 can_delete=permission.can_delete
+    #             )
+
+    #         return custom_role
+    #     return None
+# Signal to extend permissions when a role is created or modified
+
+
+
+    
 
 class Countries(models.Model):
     name = models.CharField(max_length=50)
@@ -684,3 +710,21 @@ class Permission(models.Model):
         verbose_name_plural = _("Permissions")
 
     
+# @receiver(post_save, sender=Role)
+# def extend_permissions(sender, instance, **kwargs):
+#     if instance.name in ['Student', 'Teacher', 'Parent']:
+#         # Check if default permissions already exist for this role
+#         default_permissions_exist = RolePermission.objects.filter(role__name=instance.name).exists()
+
+#         if not default_permissions_exist:
+#             # Copy default permissions for Student, Teacher, Parent
+#             default_permissions = RolePermission.objects.filter(role__name=instance.name)
+#             for permission in default_permissions:
+#                 RolePermission.objects.get_or_create(
+#                     role=instance,
+#                     service_name=permission.service_name,
+#                     can_view=permission.can_view,
+#                     can_add=permission.can_add,
+#                     can_change=permission.can_change,
+#                     can_delete=permission.can_delete
+#                 )

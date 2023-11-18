@@ -1,0 +1,14 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+    <div class="col-md-12">
+        <h2>Create Custom Role</h2>
+        <form method="post" action="">
+            {% csrf_token %}
+            <input type="hidden" name="base_role_name" value="{{ role_id }}">
+            <label for="custom_name">Custom Role Name:</label>
+            <input type="text" name="custom_name" required>
+            <button type="submit">Create</button>
+        </form>
+    </div>
+{% endblock %}

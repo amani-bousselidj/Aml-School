@@ -418,32 +418,43 @@ from django.utils.html import format_html
 # admin.site.register(Permission)
 from django import forms
 from django.contrib import admin
-from django.contrib.contenttypes.models import ContentType
-from .models import Role, Permission
+from django.urls import path, reverse
+from django.http import HttpResponseRedirect
+from django.utils.safestring import mark_safe
+from .models import Role, RolePermission
+from django.db import transaction
 
-class ServiceNameWidget(forms.TextInput):
+class ServiceNameWidget(admin.widgets.AdminTextInputWidget):
     def render(self, name, value, attrs=None, renderer=None):
         try:
             instance = self.choices.queryset.get(pk=value)
             model_name = instance.model
             return model_name
         except self.choices.queryset.model.DoesNotExist:
-            return str(value)  # Fallback to displaying the raw value if the instance does not exist
+            return str(value)
 
+class RolePermissionForm(forms.ModelForm):
+    class Meta:
+        model = RolePermission
+        fields = ['service_name', 'can_view', 'can_add', 'can_change', 'can_delete']
+
+    def __init__(self, *args, **kwargs):
+        super(RolePermissionForm, self).__init__(*args, **kwargs)
+        self.fields['service_name'].disabled = True  # Disable the service_name field
+
+    def clean(self):
+        cleaned_data = super().clean()
+        # You can add custom validation logic here if needed
+        return cleaned_data
 
 class PermissionInline(admin.TabularInline):
     model = RolePermission
     extra = 1
-    fields = ['service_name', 'can_view', 'can_add', 'can_change', 'can_delete']
-
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        if db_field.name == "service_name":
-            kwargs['widget'] = ServiceNameWidget()
-        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+    form = RolePermissionForm
 
 @admin.register(Role)
 class RoleAdmin(admin.ModelAdmin):
-    list_display = ('display_name', 'permissions_preview')  
+    list_display = ('display_name', 'permissions_preview', 'create_custom_role_link')
     inlines = [PermissionInline]
 
     def display_name(self, obj):
@@ -455,7 +466,7 @@ class RoleAdmin(admin.ModelAdmin):
         permissions = RolePermission.objects.filter(role=obj)
         preview = []
         for permission in permissions:
-            service_name = permission.get_service_name()  # Fix here
+            service_name = permission.get_service_name()
             actions = []
             if permission.can_view:
                 actions.append('View')
@@ -470,4 +481,46 @@ class RoleAdmin(admin.ModelAdmin):
 
     permissions_preview.short_description = 'Permissions Preview'
 
+    def create_custom_role_link(self, obj):
+        url = reverse('admin:custom_role_create', args=[obj.pk])
+        link = f'<a href="{url}">Create Custom Role</a>'
+        return mark_safe(link)
 
+    create_custom_role_link.short_description = 'Create Custom Role'
+
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        if request.method == 'POST' and '_create_custom_role' in request.POST:
+            custom_name = request.POST.get('custom_name')
+            base_role_name = request.POST.get('base_role_name')
+            role = Role.create_custom_role(custom_name, base_role_name)
+
+            # Get service name from RolePermission where custom_name is empty
+            # and the name of the role is the same as the selected role for the new custom role
+            role_permissions = RolePermission.objects.filter(role__name=base_role_name, role__custom_name='')
+
+            with transaction.atomic():
+                if role_permissions.exists():
+                    for role_permission in role_permissions:
+                        # Clone the permission for the new custom role
+                        RolePermission.objects.create(
+                            role=role,
+                            service_name=role_permission.service_name,
+                            can_view=role_permission.can_view,
+                            can_add=role_permission.can_add,
+                            can_change=role_permission.can_change,
+                            can_delete=role_permission.can_delete
+                        )
+                else:
+                    # Create default RolePermission entry if none exist
+                    RolePermission.objects.create(role=role, service_name='default_service_name')
+
+            return HttpResponseRedirect(reverse('admin:SchoolManage_role_change', args=[role.id]))
+
+        return super().change_view(request, object_id, form_url, extra_context)
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path('<path:object_id>/create_custom_role/', self.change_view, name='custom_role_create'),
+        ]
+        return custom_urls + urls
