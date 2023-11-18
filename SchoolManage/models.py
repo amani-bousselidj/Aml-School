@@ -671,7 +671,8 @@ class RolePermission(models.Model):
     can_add = models.BooleanField(default=False)
     can_change = models.BooleanField(default=False)
     can_delete = models.BooleanField(default=False)
-
+    def __str__(self) :
+        return f'{self.service_name.model}'
     class Meta:
         verbose_name = _("Role Permission")
         verbose_name_plural = _("Role Permissions")
@@ -691,6 +692,7 @@ class RolePermission(models.Model):
                 can_change=permission.can_change,
                 can_delete=permission.can_delete
             )
+
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 

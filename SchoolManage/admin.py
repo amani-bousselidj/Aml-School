@@ -423,30 +423,31 @@ from django.http import HttpResponseRedirect
 from django.utils.safestring import mark_safe
 from .models import Role, RolePermission
 from django.db import transaction
+from django.contrib.contenttypes.models import ContentType
 
-class ServiceNameWidget(admin.widgets.AdminTextInputWidget):
-    def render(self, name, value, attrs=None, renderer=None):
-        try:
-            instance = self.choices.queryset.get(pk=value)
-            model_name = instance.model
-            return model_name
-        except self.choices.queryset.model.DoesNotExist:
-            return str(value)
+class ModelNameWidget(forms.Select):
+    def label_from_instance(self, obj):
+        return obj.model
 
 class RolePermissionForm(forms.ModelForm):
     class Meta:
         model = RolePermission
         fields = ['service_name', 'can_view', 'can_add', 'can_change', 'can_delete']
-
+    
     def __init__(self, *args, **kwargs):
         super(RolePermissionForm, self).__init__(*args, **kwargs)
-        self.fields['service_name'].disabled = True  # Disable the service_name field
 
-    def clean(self):
-        cleaned_data = super().clean()
-        # You can add custom validation logic here if needed
-        return cleaned_data
+        # Disable checkboxes based on the principle role's permissions
+        role_instance = getattr(self.instance, 'role', None)
+        principle_role_permissions = role_instance.rolepermission_set.first() if role_instance else None
+        if principle_role_permissions:
+            self.fields['can_view'].disabled = not principle_role_permissions.can_view
+            self.fields['can_add'].disabled = not principle_role_permissions.can_add
+            self.fields['can_change'].disabled = not principle_role_permissions.can_change
+            self.fields['can_delete'].disabled = not principle_role_permissions.can_delete
 
+        # Disable the service_name field
+        self.fields['service_name'].disabled = True
 class PermissionInline(admin.TabularInline):
     model = RolePermission
     extra = 1
@@ -454,7 +455,7 @@ class PermissionInline(admin.TabularInline):
 
 @admin.register(Role)
 class RoleAdmin(admin.ModelAdmin):
-    list_display = ('display_name', 'permissions_preview', 'create_custom_role_link')
+    list_display = ('display_name',  'create_custom_role_link')
     inlines = [PermissionInline]
 
     def display_name(self, obj):
@@ -482,9 +483,9 @@ class RoleAdmin(admin.ModelAdmin):
     permissions_preview.short_description = 'Permissions Preview'
 
     def create_custom_role_link(self, obj):
-        url = reverse('admin:custom_role_create', args=[obj.pk])
-        link = f'<a href="{url}">Create Custom Role</a>'
-        return mark_safe(link)
+        url = reverse('admin:SchoolManage_role_change', args=[obj.pk])
+        link = format_html('<a href="{}#role-permissions-tab"><i class="fas fa-edit"></i></a>', url)
+        return link
 
     create_custom_role_link.short_description = 'Create Custom Role'
 
@@ -524,3 +525,12 @@ class RoleAdmin(admin.ModelAdmin):
             path('<path:object_id>/create_custom_role/', self.change_view, name='custom_role_create'),
         ]
         return custom_urls + urls
+
+@admin.register(RolePermission)
+class RolePermissionAdmin(admin.ModelAdmin):
+    list_display = ('role', 'display_service_name', 'can_view', 'can_add', 'can_change', 'can_delete')
+
+    def display_service_name(self, obj):
+        return obj.get_service_name()
+
+    display_service_name.short_description = 'Service Name'
