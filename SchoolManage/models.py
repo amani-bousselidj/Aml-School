@@ -45,8 +45,8 @@ class Role(models.Model):
         return self.custom_name or self.name or str(self.pk)
 
     class Meta:
-        verbose_name = _("Role")
-        verbose_name_plural = _("Roles")
+        verbose_name = _("Role & Permissions")
+        verbose_name_plural = _("Roles & Permissions")
         
 
     # @classmethod
@@ -675,10 +675,10 @@ class RolePermission(models.Model):
     def __str__(self) :
         return f'{self.service_name.model}'
     class Meta:
-        verbose_name = _("Role Permission")
-        verbose_name_plural = _("Role Permissions")
+        verbose_name = _("Permission")
+        verbose_name_plural = _("Permissions")
     def get_service_name(self):
-        return self.service_name.model 
+        return self.service_name
     @receiver(post_save, sender=Role)
     def extend_permissions(sender, instance, **kwargs):
      if instance.name in ['Student', 'Teacher', 'Parent']:

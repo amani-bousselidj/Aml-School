@@ -30,6 +30,7 @@ class CustomUserAdmin(admin.ModelAdmin):
         return "N/A"
 
     profile_picture_thumbnail.short_description = 'Profile Picture'
+    
 class StudentAdmin(admin.ModelAdmin):
     list_display = ('formatted_admission_number', 'student_name', 'class_name', 'birthday', 'gender', 'mobile_phone_number')
     list_filter = ('gender', 'class_name')
@@ -245,7 +246,7 @@ class GeneralSettingsAdmin(admin.ModelAdmin):
 
     # Disable the "Add" permission for GeneralSettings
     def has_add_permission(self, request):
-        return False
+        return True
 @receiver(post_save, sender=GeneralSettings)
 def update_site_logo(sender, instance, **kwargs):
     if instance.logo:
@@ -427,7 +428,7 @@ from django.contrib.contenttypes.models import ContentType
 
 class ModelNameWidget(forms.Select):
     def label_from_instance(self, obj):
-        return obj.model
+        return obj.model.split('.')[-1]
 
 class RolePermissionForm(forms.ModelForm):
     class Meta:
@@ -438,20 +439,27 @@ class RolePermissionForm(forms.ModelForm):
         super(RolePermissionForm, self).__init__(*args, **kwargs)
 
         # Disable checkboxes based on the principle role's permissions
-        role_instance = getattr(self.instance, 'role', None)
-        principle_role_permissions = role_instance.rolepermission_set.first() if role_instance else None
-        if principle_role_permissions:
-            self.fields['can_view'].disabled = not principle_role_permissions.can_view
-            self.fields['can_add'].disabled = not principle_role_permissions.can_add
-            self.fields['can_change'].disabled = not principle_role_permissions.can_change
-            self.fields['can_delete'].disabled = not principle_role_permissions.can_delete
+        # role_instance = getattr(self.instance, 'role', None)
+        # principle_role_permissions = role_instance.rolepermission_set.first() if role_instance else None
+        # if principle_role_permissions:
+        #     self.fields['can_view'].disabled = not principle_role_permissions.can_view
+        #     self.fields['can_add'].disabled = not principle_role_permissions.can_add
+        #     self.fields['can_change'].disabled = not principle_role_permissions.can_change
+        #     self.fields['can_delete'].disabled = not principle_role_permissions.can_delete
 
         # Disable the service_name field
         self.fields['service_name'].disabled = True
+
 class PermissionInline(admin.TabularInline):
     model = RolePermission
     extra = 1
     form = RolePermissionForm
+
+    # def formfield_for_dbfield(self, db_field, **kwargs):
+    #     if db_field.name == 'can_delete':
+    #         # Set can_delete to True by default in inline form
+    #         kwargs['initial'] = True
+    #     return super().formfield_for_dbfield(db_field, **kwargs)
 
 @admin.register(Role)
 class RoleAdmin(admin.ModelAdmin):
@@ -526,14 +534,20 @@ class RoleAdmin(admin.ModelAdmin):
         ]
         return custom_urls + urls
 
+    def get_queryset(self, request):
+        # Filter roles with a non-empty custom name from the list view
+        return super().get_queryset(request).exclude(custom_name='').filter(custom_name__isnull=False)
+
 @admin.register(RolePermission)
 class RolePermissionAdmin(admin.ModelAdmin):
     list_display = ('role', 'display_service_name', 'can_view', 'can_add', 'can_change', 'can_delete')
 
     def display_service_name(self, obj):
-        return obj.get_service_name()
+        return obj.service_name.model_class().__name__
 
     display_service_name.short_description = 'Service Name'
+
+
 
     def has_add_permission(self, request):
         return False  # Disable "Add" permission
@@ -542,4 +556,9 @@ class RolePermissionAdmin(admin.ModelAdmin):
         return False  # Disable "Change" permission
 
     def has_delete_permission(self, request, obj=None):
-        return False  # Disable "Delete" permission
+        return True  # Disable "Delete" permission
+
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        del actions['delete_selected']
+        return actions
