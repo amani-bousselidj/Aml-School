@@ -40,7 +40,7 @@ CORS_ALLOWED_ORIGINS = [
 #     "http://localhost:5173",  # Add your React frontend URL
 # ]
 CSRF_COOKIE_SAMESITE = 'None'  # For production
-
+CSRF_COOKIE_SECURE = True  # For development
 
 CORS_ALLOW_CREDENTIALS= True  # For development; in production, specify your frontend's origin.
 
@@ -64,9 +64,9 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
         'django.middleware.locale.LocaleMiddleware',
 
+'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-            'corsheaders.middleware.CorsMiddleware',
  'SchoolManage.middleware.AdminLogoutMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
