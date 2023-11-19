@@ -534,3 +534,12 @@ class RolePermissionAdmin(admin.ModelAdmin):
         return obj.get_service_name()
 
     display_service_name.short_description = 'Service Name'
+
+    def has_add_permission(self, request):
+        return False  # Disable "Add" permission
+
+    def has_change_permission(self, request, obj=None):
+        return False  # Disable "Change" permission
+
+    def has_delete_permission(self, request, obj=None):
+        return False  # Disable "Delete" permission

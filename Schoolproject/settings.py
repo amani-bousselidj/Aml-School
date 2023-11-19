@@ -255,7 +255,7 @@ JAZZMIN_SETTINGS = {
     "changeform_format": "horizontal_tabs",
     "changeform_format_overrides": {"auth.user": "collapsible", "auth.group": "vertical_tabs"},
 "hide_apps": ["SchoolManage","Auth","authtoken"],
-
+"show_models":["Role"],
 
  "show_sidebar": True,
     "navigation_expanded": False,

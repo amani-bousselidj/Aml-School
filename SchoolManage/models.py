@@ -47,6 +47,7 @@ class Role(models.Model):
     class Meta:
         verbose_name = _("Role")
         verbose_name_plural = _("Roles")
+        
 
     # @classmethod
     # def create_custom_role(cls, custom_name, base_role_name):
