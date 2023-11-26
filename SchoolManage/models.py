@@ -13,7 +13,7 @@ from django.dispatch import receiver
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-
+from django.core.validators import RegexValidator
 class Role(models.Model):
     ROLE_CHOICES = [
         ('Student', 'Student'),
@@ -69,6 +69,11 @@ class Countries(models.Model):
 
 
 class CustomUser(AbstractUser):
+    username_validator = RegexValidator(
+        regex=r'^[\w.@+-]+$',
+        message=_('Enter a valid username. This value may contain only letters, numbers, and @/./+/-/_ characters.'),
+        flags=['case_sensitive'],
+    )
     GENDER_CHOICES = [
         ('male', 'Male'),
         ('Female', 'Female'),
