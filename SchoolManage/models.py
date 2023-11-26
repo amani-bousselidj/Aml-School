@@ -181,7 +181,7 @@ class Student(models.Model):
     gender = models.CharField(max_length=10, choices=GENDER_CHOICES)
     mobile_phone_number = models.CharField(max_length=15)
     parents = models.ManyToManyField(Parent)
-    Date_joined = models.DateField( auto_now=False, auto_now_add=False,default=None,null=True)
+    # Date_joined = models.DateField( auto_now=False, auto_now_add=False,default=None,null=True)
     def __str__(self):
         return self.user.username
 
