@@ -28,13 +28,11 @@ CORS_ALLOW_HEADERS = ['*']
 CORS_ALLOW_METHODS = ['*']
 CSRF_COOKIE_SAMESITE = 'None'
 ALLOWED_HOSTS = ['*']
-CORS_ALLOW_ALL_ORIGINS = True# Application definition
+# CORS_ALLOW_ALL_ORIGINS = True# Application definition
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173", 
-    'http://127.0.0.1',
-     "http://0.0.0.0", # For development
-   "https://aml-school.com" # For production
+    "http://localhost:5173",
+    "https://aml-school.com",
 ]
 # CORS_ALLOW_ORIGIN_WHITELIST = [
 #     "http://localhost:5173",  
