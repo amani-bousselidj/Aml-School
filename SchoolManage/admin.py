@@ -1,5 +1,5 @@
 from django.utils.translation import gettext as _
-
+from django.contrib.admin.sites import AdminSite
 from django.contrib import admin
 from .models import *
 from django import forms
@@ -12,6 +12,14 @@ from django.conf import settings
 from django.core.files.storage import default_storage as storage
 from django.contrib.auth import get_user_model  # Import the user model
 from django.contrib.auth.models import User, Permission
+from django.utils.html import format_html
+from django.forms.widgets import Widget
+
+class WebPImageWidget(Widget):
+    def render(self, name, value, attrs=None, renderer=None):
+        if value:
+            return format_html('<img src="{}" width="50" />', value.url)
+        return "No Image"
 
 class CustomUserAdmin(admin.ModelAdmin):
     list_display = ('username', 'first_name', 'last_name', 'user_country', 'email', 'role', 'telephone', 'gender', 'birthday', 'address', 'marital_status', 'profile_picture_thumbnail')
@@ -32,13 +40,25 @@ class CustomUserAdmin(admin.ModelAdmin):
     profile_picture_thumbnail.short_description = 'Profile Picture'
     
 class StudentAdmin(admin.ModelAdmin):
-    list_display = ('formatted_admission_number', 'student_name', 'class_name', 'birthday', 'gender', 'mobile_phone_number')
+    list_display = ('formatted_admission_number','username',  'class_name', 'birthday', 'gender', 'mobile_phone_number',  'profile_picture_thumbnail')
     list_filter = ('gender', 'class_name')
     readonly_fields = ('formatted_admission_number',)
 
     def formatted_admission_number(self, obj):
         return str(obj.admission_number)
+    
+    def profile_picture_thumbnail(self, obj):
+        if obj.user.profile_picture:
+            return format_html('<img src="{}" width="50" height="50" style="border-radius: 50%;" />', obj.user.profile_picture.url)
+        return format_html('<img src="{}" width="30" style="border-radius: 50%;" />', '/static/admin/img/avatar2.svg')
+
+    def username(self, obj):
+        return obj.user.username
+
     formatted_admission_number.short_description = 'Admission Number'
+    profile_picture_thumbnail.short_description = 'Profile Picture'
+    username.short_description = 'Username'
+
    
 class ParentAdmin(admin.ModelAdmin):
     list_display = ('Parent_name', 'Parent_phone', 'Parent_occupation')
@@ -200,6 +220,14 @@ from .models import GeneralSettings
 from .forms import GeneralSettingsForm
 from django.utils.html import format_html
 
+# admin.py
+from django.contrib import admin
+from django.utils.html import format_html
+from django.dispatch import receiver
+from django.db.models.signals import post_save
+from django.conf import settings
+from .models import GeneralSettings
+
 @admin.register(GeneralSettings)
 class GeneralSettingsAdmin(admin.ModelAdmin):
     # List all fields in list_display
@@ -208,26 +236,8 @@ class GeneralSettingsAdmin(admin.ModelAdmin):
         'site_name',
         'phone',
         'email',
-        # 'facebook',
-        # 'twitter',
-        # 'youtube',
-        # 'instagram',
-        # 'tiktok',
-        # 'snapchat',
-        # 'linkedin',
-        
-        # 'google_map_link',
-        # 'google_map_iframe',
         'address',
-        # 'login_timeout',
-        # 'about_small',
-        # 'seo_keywords',
-        # 'seo_description',
-        # 'privacy_policy',
-        # 'terms_conditions',
-        # 'head_tag',
-        # 'footer_tag'
-         'work_time',
+        'work_time',
     )
 
     # Define a custom method to display the logo image
@@ -243,18 +253,29 @@ class GeneralSettingsAdmin(admin.ModelAdmin):
 
     # Define a custom action for updating settings
 
-
     # Disable the "Add" permission for GeneralSettings
     def has_add_permission(self, request):
-        return False
-@receiver(post_save, sender=GeneralSettings)
-def update_site_logo(sender, instance, **kwargs):
-    if instance.logo:
-        # Update the site logo in Django settings
-        settings.SITE_LOGO_URL = storage.url(instance.logo.name)
-    else:
-        # Use a default logo URL if no logo is set
-        settings.SITE_LOGO_URL = '/static/admin/img/about-image-02.png'
+        return True
+
+from django.dispatch import receiver
+from django.conf import settings
+from .models import GeneralSettings
+
+# ...
+
+# @receiver(post_save, sender=GeneralSettings)
+# def update_site_logo(sender, instance, **kwargs):
+#     print("Signal triggered!")
+#     if 'JAZZMIN_SETTINGS' in dir(settings) and 'SITE_LOGO_URL' in settings.JAZZMIN_SETTINGS:
+#         if instance.logo:
+#             # Update the site logo in Django settings
+#             settings.JAZZMIN_SETTINGS['SITE_LOGO_URL'] = instance.logo.url
+#         else:
+#             # Use a default logo URL if no logo is set
+#             settings.JAZZMIN_SETTINGS['SITE_LOGO_URL'] = '/static/admin/img/about-image-02.png'
+
+
+
 from django.contrib import admin
 from django.contrib import admin
 from .models import Role
@@ -297,123 +318,6 @@ class RoleForm(forms.ModelForm):
 from django.urls import reverse
 from django.utils.html import format_html
 
-# class RoleAdmin(admin.ModelAdmin):
-#     list_display = ['display_name', 'update_role', 'view_role', 'delete_role']
-#     form = RoleForm
-
-#     def display_name(self, obj):
-#         return obj.name or obj.custom_name
-
-#     display_name.short_description = 'Name'
-
-#     def update_role(self, obj):
-#         update_url = reverse('admin:SchoolManage_role_change', args=[obj.id])
-#         return format_html(
-#             '<a href="{}">'
-#             '<i class="fas fa-edit" aria-hidden="true" title="Update"></i></a>'.format(update_url)
-#         )
-
-#     update_role.short_description = 'Update'
-
-#     def view_role(self, obj):
-#         view_url = reverse('admin:SchoolManage_role_changelist') + f'{obj.id}/'
-#         return format_html(
-#             '<a href="{}">'
-#             '<i class="fas fa-eye" style="color:#6610F2" aria-hidden="true" title="View"></i></a>'.format(view_url)
-#         )
-
-#     view_role.short_description = 'View'
-
-#     def delete_role(self, obj):
-#         delete_url = reverse('admin:SchoolManage_role_delete', args=[obj.id])
-#         return format_html(
-#             '<a href="{}">'
-#             '<i class="fas fa-trash" style="color:red"  aria-hidden="true" title="Delete"></i></a>'.format(delete_url)
-#         )
-
-#     delete_role.short_description = 'Delete'
-#     inlines = [CustomPermissionInline]
-
-# admin.site.register(Role, RoleAdmin)
-
-# from django.contrib import admin
-# from django.contrib.admin import TabularInline
-# from .models import Role, CustomPermission
-
-# class CustomPermissionInline(admin.TabularInline):
-#     model = CustomPermission
-#     extra = 0  # Set the number of empty forms to display
-
-# class RoleAdmin(admin.ModelAdmin):
-#     list_display = ('name', 'custom_name')
-#     inlines = [CustomPermissionInline]
-# from django import forms
-# from django.contrib import admin
-# from django.contrib.auth.models import Permission
-# from django.contrib.contenttypes.models import ContentType
-# from django.utils.html import format_html
-# from .models import Role, CustomPermission
-
-# class CustomPermissionInline(admin.TabularInline):
-#     model = CustomPermission
-#     extra = 0
-
-# @admin.register(Role)
-# class RoleAdmin(admin.ModelAdmin):
-#     list_display = ('custom_name', 'name', 'view_permissions')
-#     inlines = [CustomPermissionInline]
-
-#     def get_form(self, request, obj=None, **kwargs):
-#         self.request = request  # Make the request object available within the class
-#         return super().get_form(request, obj, **kwargs)
-
-#     def view_permissions(self, obj):
-#         # Fetch all content types for your models
-#         content_types = ContentType.objects.exclude(app_label='auth')  # Exclude Django models
-
-#         # Create a dictionary to store permissions for each model
-#         permissions_dict = {}
-
-#         # Update permissions based on your logic
-#         if self.request.method == 'POST':
-#             for content_type in content_types:
-#                 model_name = content_type.model
-
-#                 can_view = self.request.POST.get(f'{model_name}_can_view')
-#                 can_add = self.request.POST.get(f'{model_name}_can_add')
-#                 can_change = self.request.POST.get(f'{model_name}_can_change')
-#                 can_delete = self.request.POST.get(f'{model_name}_can_delete')
-
-#                 permissions = []
-
-#                 if can_view:
-#                     permissions.append('Can View')
-#                 if can_add:
-#                     permissions.append('Can Add')
-#                 if can_change:
-#                     permissions.append('Can Change')
-#                 if can_delete:
-#                     permissions.append('Can Delete')
-
-#                 permissions_dict[model_name] = permissions
-
-#         # Format permissions for display and editing
-#         permissions_table = '<form method="POST">'
-#         permissions_table += '<table>'
-#         permissions_table += '<tr><th>Model</th><th>Can View</th><th>Can Add</th><th>Can Change</th><th>Can Delete</th></tr>'
-#         for model, permissions in permissions_dict.items():
-#             permissions_table += f'<tr><td>{model}</td>'
-#             for action in ['can_view', 'can_add', 'can_change', 'can_delete']:
-#                 is_allowed = action in permissions
-#                 permissions_table += f'<td><input type="checkbox" name="{model}_{action}" {"checked" if is_allowed else ""}></td>'
-#             permissions_table += '</tr>'
-#         permissions_table += '</table>'
-#         permissions_table += '<input type="submit" value="Save">'
-#         permissions_table += '</form>'
-
-#         return format_html(permissions_table)
-
-#     view_permissions.short_description = 'Permissions'
 
 # # Register the Permission model
 # admin.site.register(Permission)
@@ -461,7 +365,7 @@ class PermissionInline(admin.TabularInline):
     #         kwargs['initial'] = True
     #     return super().formfield_for_dbfield(db_field, **kwargs)
 
-@admin.register(Role)
+# @admin.register(Role)
 class RoleAdmin(admin.ModelAdmin):
     list_display = ('display_name',  'create_custom_role_link')
     inlines = [PermissionInline]
@@ -538,7 +442,7 @@ class RoleAdmin(admin.ModelAdmin):
         # Filter roles with a non-empty custom name from the list view
         return super().get_queryset(request).exclude(custom_name='').filter(custom_name__isnull=False)
 
-@admin.register(RolePermission)
+# @admin.register(RolePermission)
 class RolePermissionAdmin(admin.ModelAdmin):
     list_display = ('role', 'display_service_name', 'can_view', 'can_add', 'can_change', 'can_delete')
 
@@ -562,3 +466,91 @@ class RolePermissionAdmin(admin.ModelAdmin):
         actions = super().get_actions(request)
         del actions['delete_selected']
         return actions
+
+
+class CustomModelAdmin(admin.ModelAdmin):
+    # Your customizations for the model admin go here
+    pass
+
+# Custom admin site
+from django.contrib import admin
+# from admin_tools_stats.models import *
+
+class CustomAdminSite(admin.AdminSite):
+    site_header = 'Adminstration'
+    site_title = 'Aml-School'
+    index_title = 'Adminstration'
+
+    def index(self, request, extra_context=None):
+        app_list = self.get_app_list(request)
+        
+        # Exclude the app(s) you want to hide from the dashboard
+        excluded_apps = ['SchoolManage']
+        
+        # Filter out the excluded apps
+        app_list = [app for app in app_list if app['app_label'] not in excluded_apps]
+        
+        context = {
+                        'app_list': app_list,
+            # 'custom_variable': 'Hello, this is a custom variable!',
+        }
+        context.update(extra_context or {})
+        
+        return super().index(request, context)
+
+# Register your custom admin site
+custom_admin_site = CustomAdminSite(name='customadmin')
+admin.site = custom_admin_site
+
+
+# Create an instance of the custom admin site
+custom_admin_site = CustomAdminSite(name='custom_admin')
+
+# Register your model with the custom ModelAdmin class for the custom admin site
+custom_admin_site.register(CustomUser, CustomUserAdmin)
+# custom_admin_site.register(DashboardStatsCriteria)
+# custom_admin_site.register(DashboardStats)
+custom_admin_site.register(Student, StudentAdmin)
+custom_admin_site.register(Parent, ParentAdmin)
+custom_admin_site.register(Teacher, TeacherAdmin)
+custom_admin_site.register(CourseCategory, CustomModelAdmin)
+custom_admin_site.register(Course, CourseAdmin)
+custom_admin_site.register(CourseSection, CustomModelAdmin)
+custom_admin_site.register(Lesson, LessonAdmin)
+custom_admin_site.register(Quiz, QuizAdmin)
+custom_admin_site.register(Question, QuestionAdmin)
+custom_admin_site.register(Choice, CustomModelAdmin)
+custom_admin_site.register(ExamResult, ExamResultAdmin)
+custom_admin_site.register(Subject, SubjectAdmin)
+custom_admin_site.register(Syllabus, SyllabusAdmin)
+custom_admin_site.register(LiveMeeting, LiveMeetingAdmin)
+custom_admin_site.register(Class, ClassAdmin)
+custom_admin_site.register(Section, SectionAdmin)
+custom_admin_site.register(LessonPlan, LessonPlanAdmin)
+custom_admin_site.register(Homework, HomeworkAdmin)
+custom_admin_site.register(Payment, CustomModelAdmin)
+custom_admin_site.register(QuestionChoice, CustomModelAdmin)
+custom_admin_site.register(SubmitedHomworks, CustomModelAdmin)
+custom_admin_site.register(ShoppingCart, CustomModelAdmin)
+custom_admin_site.register(Order, CustomModelAdmin)
+custom_admin_site.register(GeneralSettings, GeneralSettingsAdmin)
+custom_admin_site.register(Countries, CountriesAdmin)
+custom_admin_site.register(Role,RoleAdmin)
+custom_admin_site.register(RolePermission,RolePermissionAdmin)
+custom_admin_site.register(VideoLesson,VediolessonAdmin)
+custom_admin_site.register(OnlineExam,OnlineExamAdmin)
+custom_admin_site.register(StudentAttempt,CustomModelAdmin)
+custom_admin_site.register(StudentAnswer,CustomModelAdmin)
+custom_admin_site.register(StudentProgress,CustomModelAdmin)
+custom_admin_site.register(Certificate,CustomModelAdmin)
+custom_admin_site.register(Rating,RatingAdmin)
+# custom_admin_site.register(CachedValue)
+
+
+# Register the custom admin site
+admin.site = custom_admin_site
+
+
+
+
+

@@ -34,10 +34,11 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173", 
     'http://127.0.0.1',
      "http://0.0.0.0", # For development
-   "https://aml-school.onrender.com" # For production
+   "https://aml-school.com" # For production
 ]
 # CORS_ALLOW_ORIGIN_WHITELIST = [
-#     "http://localhost:5173",  # Add your React frontend URL
+#     "http://localhost:5173",  
+#     "http://localhost:4173/",# Add your React frontend URL
 # ]
 CSRF_COOKIE_SAMESITE = 'None'  # For production
 CSRF_COOKIE_SECURE = True  # For development
@@ -46,9 +47,14 @@ CORS_ALLOW_CREDENTIALS= True  # For development; in production, specify your fro
 
 INSTALLED_APPS = [
     'jazzmin',
+    #  'admin_tools_stats',  # this must be BEFORE 'admin_tools' and 'django.contrib.admin'
+    # 'django_nvd3',
+    
+    #     'admin_tools',  # Include 'admin_tools' after 'admin_tools_stats'
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
+    
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
@@ -57,6 +63,9 @@ INSTALLED_APPS = [
      'rest_framework.authtoken',
       'ckeditor',
       'corsheaders',
+        # 'admin_interface',
+    #    "admincharts",
+          
 ]
 
 MIDDLEWARE = [
@@ -100,7 +109,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                                 'django.template.context_processors.i18n',
-
+                'SchoolManage.context_processors.custom_logo',
                 'django.contrib.messages.context_processors.messages',
             ],
         },
@@ -214,7 +223,7 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',  # Default ModelBackend
     # Add any custom backends if needed
 ]
-SITE_LOGO_URL = '/static/admin/img/about-image-02.png' 
+# SITE_LOGO_URL = '/static/admin/img/about-image-02.png' 
   # Default logo URL
 JAZZMIN_SETTINGS = {
     "language_chooser": True,
@@ -249,12 +258,13 @@ JAZZMIN_SETTINGS = {
     "site_header": "Aml_School",
     "site_brand": "Aml School",
  "changeform_format": "single",
-    "site_logo": "images/photo_2023-11-11_10-56-40.jpg",
+ 
+    # "site_logo": "images/photo_2023-11-11_10-56-40.jpg",
                     "navigation_expanded": True,
     "copyright": "Aml School",
     "changeform_format": "horizontal_tabs",
     "changeform_format_overrides": {"auth.user": "collapsible", "auth.group": "vertical_tabs"},
-"hide_apps": ["SchoolManage","Auth","authtoken"],
+"hide_apps": ["Auth","authtoken"],
 "show_models":["Role"],
 
  "show_sidebar": True,

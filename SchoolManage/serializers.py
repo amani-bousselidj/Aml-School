@@ -1,21 +1,42 @@
 from rest_framework import serializers
 from .models import *
-
+class CountriesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Countries
+        fields = '__all__'
+# serializers.py
 class CustomUserSerializer(serializers.ModelSerializer):
+    role_name = serializers.CharField(write_only=True)
+    country_id = serializers.IntegerField(write_only=True, required=False)
+
+    
     class Meta:
         model = CustomUser
-        fields = ('username', 'password', 'email','role')
+        fields = ('username', 'password', 'email', 'role_name', 'country_id','profile_picture')
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
-        user = CustomUser(
-            username=validated_data['username'],
-            email=validated_data['email'],
-            role = validated_data['role'],
-        )
+        role_name = validated_data.pop('role_name', None)
+        country_id = validated_data.pop('country_id', None)
+
+        if role_name:
+            roles = Role.objects.filter(name=role_name)
+            if roles.exists():
+                role = roles.first()
+                validated_data['role'] = role
+            else:
+                raise serializers.ValidationError(f"Role with name '{role_name}' does not exist.")
+
+        if country_id:
+            country = Countries.objects.get(pk=country_id)
+            validated_data['country'] = country
+
+        user = CustomUser(**validated_data)
         user.set_password(validated_data['password'])
         user.save()
         return user
+
+
 
 class StudentSerializer(serializers.ModelSerializer):
     class Meta:
@@ -28,6 +49,8 @@ class ParentSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class TeacherSerializer(serializers.ModelSerializer):
+    user = CustomUserSerializer()
+
     class Meta:
         model = Teacher
         fields = '__all__'
@@ -212,4 +235,10 @@ class CourseWithContentSerializer(serializers.ModelSerializer):
   
     class Meta:
         model = Course
+        fields = '__all__'
+
+
+class GeneralSettingsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GeneralSettings
         fields = '__all__'

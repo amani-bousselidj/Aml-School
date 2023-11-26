@@ -47,3 +47,7 @@ def create_course_with_sections_quizzes_lessons(data):
         return Response(course_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     return Response({'message': 'Course, sections, quizzes, and lessons created successfully'}, status=status.HTTP_201_CREATED)
+
+
+
+

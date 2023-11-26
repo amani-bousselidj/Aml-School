@@ -133,6 +133,7 @@ class RegisterUserView(generics.CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
+            print(user)
             token, created = Token.objects.get_or_create(user=user)
             return Response({'token': token.key, 'message': 'Registration successful'}, status=status.HTTP_201_CREATED)
         else:
@@ -1067,3 +1068,18 @@ class CreateCourseWithSectionsQuizzesLessonsView(generics.ListCreateAPIView):
 
 # def index(request):
 #     return render(request, "build/index.html")
+from rest_framework.views import APIView
+class GeneralSettingsAPIView(APIView):
+    def get(self, request, *args, **kwargs):
+        try:
+            general_settings = GeneralSettings.objects.first()
+            serializer = GeneralSettingsSerializer(general_settings)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except GeneralSettings.DoesNotExist:
+            return Response({"detail": "GeneralSettings not found"}, status=status.HTTP_404_NOT_FOUND)
+
+class CountryListView(APIView):
+    def get(self, request, *args, **kwargs):
+        countries = Countries.objects.all()
+        serializer = CountriesSerializer(countries, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

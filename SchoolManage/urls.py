@@ -10,7 +10,6 @@
 # router.register(r'customusers', views.CustomUserViewSet)
 # # router.register(r'students', views.StudentViewSet)
 # router.register(r'parents', views.ParentViewSet)
-# router.register(r'teachers', views.TeacherViewSet)
 # router.register(r'coursecategories', views.CourseCategoryViewSet)
 # # router.register(r'courses', views.CourseViewSet)
 # router.register(r'coursesections', views.CourseSectionViewSet)
@@ -91,9 +90,12 @@ quizzes_router.register(r'quizzes', views.QuizViewSet, basename='quiz')
 # Create a nested router for Questions
 questions_router = routers.NestedDefaultRouter(quizzes_router, r'quizzes', lookup='quiz')
 questions_router.register(r'questions', views.QuestionViewSet, basename='question')
+router.register(r'teachers', views.TeacherViewSet)
 
 urlpatterns = [
     path('students/', StudentListCreateView.as_view(), name='student-list-create'),
+    # path('Teachers/', views.TeacherViewSet, name='teachers'),
+     path('countries/', CountryListView.as_view(), name='country-list'),
     path('Homeworks/<int:pk>/', HomeworkDetailView.as_view(), name='Homework-details'),
     path('LessonPlan/<int:pk>/', LessonPlanDetailView.as_view(), name='LessonPlan-details'),
     path('Syllabus/', SyllabusView.as_view(), name='Syllabus'),
@@ -120,6 +122,7 @@ path('students/<int:pk>/', StudentDetailView.as_view(), name='student-detail'),
     path('ExamResult/<int:pk>/', ExamResultDetailView.as_view(), name='ExamResult-details'),
     path('SubmitedHomworks/', SubmitedHomworksView.as_view(), name='SubmitedHomworks'),
         path('api/home-data/', views.home_data, name='home_data'),
+            path('general-settings/', GeneralSettingsAPIView.as_view(), name='general-settings'),
     path('', include(router.urls)),
     path('', include(course_sections_router.urls)),
     path('', include(video_lessons_router.urls)),

@@ -27,7 +27,7 @@ urlpatterns = [
         path("admin/", include('SchoolManage.urls')),
     path('api/',include('SchoolManage.urls')),
     # path('admin/show-permissions/<int:role_id>/', show_permissions, name='show_permissions'),
-
+    # path('admin_tools_stats/', include('admin_tools_stats.urls')),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

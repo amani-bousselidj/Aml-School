@@ -49,28 +49,7 @@ class Role(models.Model):
         verbose_name_plural = _("Roles & Permissions")
         
 
-    # @classmethod
-    # def create_custom_role(cls, custom_name, base_role_name):
-    #     if custom_name:
-    #         custom_role = cls.objects.create(custom_name=custom_name)
 
-    #         # Copy permissions from the base role to the custom role
-    #         base_role = cls.objects.get(name=base_role_name)
-    #         base_permissions = RolePermission.objects.filter(role=base_role)
-
-    #         for permission in base_permissions:
-    #             RolePermission.objects.create(
-    #                 role=custom_role,
-    #                 service_name=permission.service_name,
-    #                 can_view=permission.can_view,
-    #                 can_add=permission.can_add,
-    #                 can_change=permission.can_change,
-    #                 can_delete=permission.can_delete
-    #             )
-
-    #         return custom_role
-    #     return None
-# Signal to extend permissions when a role is created or modified
 
 
 
@@ -111,6 +90,13 @@ class CustomUser(AbstractUser):
         except Teacher.DoesNotExist:
             return None
 
+    @property
+    def student(self):
+        try:
+            return self.student_profile
+        except Student.DoesNotExist:
+            return None
+
     def __str__(self):
         return self.username
 
@@ -118,19 +104,29 @@ class CustomUser(AbstractUser):
         verbose_name = _("Custom User")
         verbose_name_plural = _("Custom Users")
 
+@receiver(post_save, sender=CustomUser)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created and instance.role:
+        try:
+            role = instance.role  # Use the role directly, assuming it's already assigned correctly
+            print(f"Role found: {role}")
+            
+            if role.name == 'Teacher':
+                Teacher.objects.create(user=instance)
+            elif role.name == 'Student':
+                Student.objects.create(user=instance)
+        except Role.DoesNotExist:
+            print(f"Role with name '{instance.role_name}' does not exist.")
+
+
 
 @receiver(post_save, sender=CustomUser)
-def create_teacher_profile(sender, instance, created, **kwargs):
-    if created and instance.role == 'teacher':
-        teacher_profile = Teacher.objects.create(user=instance)
-        instance.teacher = teacher_profile
-        instance.save()
-
-@receiver(post_save, sender=CustomUser)
-def save_teacher_profile(sender, instance, **kwargs):
-    if instance.role == 'teacher':
-        if hasattr(instance, 'teacher'):
+def save_user_profile(sender, instance, **kwargs):
+    if instance.role:
+        if instance.role.name == 'Teacher':
             instance.teacher.save()
+        elif instance.role.name == 'Student':
+            instance.student.save()
 
 class CustomPermission(models.Model):
     role = models.ForeignKey(Role, on_delete=models.CASCADE, null=True, default=None)
@@ -157,6 +153,19 @@ class RolePermission(models.Model):
         verbose_name = _("Role Permission")
         verbose_name_plural = _("Role Permissions")
 
+class Parent(models.Model):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    Parent_name = models.CharField(max_length=255, blank=True, null=True)
+    Parent_phone = models.CharField(max_length=15, blank=True, null=True)
+    Parent_occupation = models.CharField(max_length=255, blank=True, null=True)
+    # children = models.ManyToManyField(CustomUser, related_name='parents',        limit_choices_to={'role__name__exact': 'student'})
+
+    def __str__(self):
+        return self.Parent_name or str(self.user)
+
+    class Meta:
+        verbose_name = _("Parent")
+        verbose_name_plural = _("Parents")
 
 class Student(models.Model):
     GENDER_CHOICES = [
@@ -168,32 +177,19 @@ class Student(models.Model):
     admission_number = models.UUIDField(primary_key=False, default=uuid.uuid4, editable=False)
     student_name = models.CharField(max_length=255)
     class_name = models.CharField(max_length=50)
-    birthday = models.DateField()
+    birthday = models.DateField(default=None,null=True)
     gender = models.CharField(max_length=10, choices=GENDER_CHOICES)
     mobile_phone_number = models.CharField(max_length=15)
-    parents = models.ManyToManyField(CustomUser, related_name='children', limit_choices_to={'role': 'parent'})
-
+    parents = models.ManyToManyField(Parent)
+    Date_joined = models.DateField( auto_now=False, auto_now_add=False,default=None,null=True)
     def __str__(self):
-        return self.student_name
+        return self.user.username
 
     class Meta:
         verbose_name = _("Student")
         verbose_name_plural = _("Students")
 
 
-class Parent(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
-    Parent_name = models.CharField(max_length=255, blank=True, null=True)
-    Parent_phone = models.CharField(max_length=15, blank=True, null=True)
-    Parent_occupation = models.CharField(max_length=255, blank=True, null=True)
-    children = models.ManyToManyField(CustomUser, related_name='parents', limit_choices_to={'role': 'student'})
-
-    def __str__(self):
-        return self.Parent_name or str(self.user)
-
-    class Meta:
-        verbose_name = _("Parent")
-        verbose_name_plural = _("Parents")
 
 
 class Teacher(models.Model):
@@ -634,6 +630,7 @@ class ShoppingCart(models.Model):
     class Meta:
         verbose_name = _("ShoppingCart")
         verbose_name_plural = _("ShoppingCarts")
+from django.conf import settings
 class GeneralSettings(models.Model):
     site_name = models.CharField(max_length=255, blank=True, null=True)
     phone = models.CharField(max_length=20, blank=True, null=True)
@@ -659,6 +656,27 @@ class GeneralSettings(models.Model):
     terms_conditions = models.TextField(blank=True, null=True)
     head_tag = models.TextField(blank=True, null=True)
     footer_tag = models.TextField(blank=True, null=True)
+    logo_changed = False  # Variable to indicate whether the logo has changed
+
+    def save(self, *args, **kwargs):
+        if self.pk:
+            original = GeneralSettings.objects.get(pk=self.pk)
+            if original.logo != self.logo:
+                self.logo_changed = True  # Set the variable to True if the logo has changed
+
+        super().save(*args, **kwargs)
+
+    def get_custom_logo_url(self):
+        if self.logo and self.logo_changed:
+            # If the logo has changed, return the updated logo URL
+            return self.logo.url
+        elif self.logo:
+            # If the logo has not changed, return the original logo URL
+            return self.logo.url
+        else:
+            # If there is no logo, return a default logo URL or handle accordingly
+            return settings.STATIC_URL + 'admin/img/default_logo.png'  # Adjust this line as needed
+
     class Meta:
         verbose_name = _("GeneralSetting")
         verbose_name_plural = _("GeneralSettings")
@@ -713,21 +731,11 @@ class Permission(models.Model):
         verbose_name_plural = _("Permissions")
 
     
-# @receiver(post_save, sender=Role)
-# def extend_permissions(sender, instance, **kwargs):
-#     if instance.name in ['Student', 'Teacher', 'Parent']:
-#         # Check if default permissions already exist for this role
-#         default_permissions_exist = RolePermission.objects.filter(role__name=instance.name).exists()
 
-#         if not default_permissions_exist:
-#             # Copy default permissions for Student, Teacher, Parent
-#             default_permissions = RolePermission.objects.filter(role__name=instance.name)
-#             for permission in default_permissions:
-#                 RolePermission.objects.get_or_create(
-#                     role=instance,
-#                     service_name=permission.service_name,
-#                     can_view=permission.can_view,
-#                     can_add=permission.can_add,
-#                     can_change=permission.can_change,
-#                     can_delete=permission.can_delete
-#                 )
+
+class UICustomization(models.Model):
+    code_snippet = models.TextField()
+
+
+
+    
