@@ -347,4 +347,3 @@ JAZZMIN_UI_TWEAKS = {
 
 MEDIA_ROOT = BASE_DIR / 'media'
 MEDIA_URL = '/media/'
-
