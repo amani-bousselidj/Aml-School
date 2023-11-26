@@ -177,9 +177,9 @@ class Student(models.Model):
     admission_number = models.UUIDField(primary_key=False, default=uuid.uuid4, editable=False)
     student_name = models.CharField(max_length=255)
     class_name = models.CharField(max_length=50)
-    birthday = models.DateField(default=None,null=True)
-    gender = models.CharField(max_length=10, choices=GENDER_CHOICES)
-    mobile_phone_number = models.CharField(max_length=15)
+    birthday = models.DateField(default=None,null=True,blank=True)
+    gender = models.CharField(max_length=10, choices=GENDER_CHOICES,null=True,blank=True)
+    mobile_phone_number = models.CharField(max_length=15,null=True,blank=True)
     parents = models.ManyToManyField(Parent)
     # Date_joined = models.DateField( auto_now=False, auto_now_add=False,default=None,null=True)
     def __str__(self):
