@@ -14,7 +14,7 @@ from django.contrib.auth import get_user_model  # Import the user model
 from django.contrib.auth.models import User, Permission
 from django.utils.html import format_html
 from django.forms.widgets import Widget
-from admin_tools_stats.models import *
+# from admin_tools_stats.models import *
 class WebPImageWidget(Widget):
     def render(self, name, value, attrs=None, renderer=None):
         if value:
@@ -508,8 +508,8 @@ custom_admin_site = CustomAdminSite(name='custom_admin')
 
 # Register your model with the custom ModelAdmin class for the custom admin site
 custom_admin_site.register(CustomUser, CustomUserAdmin)
-custom_admin_site.register(DashboardStatsCriteria)
-custom_admin_site.register(DashboardStats)
+# custom_admin_site.register(DashboardStatsCriteria)
+# custom_admin_site.register(DashboardStats)
 custom_admin_site.register(Student, StudentAdmin)
 custom_admin_site.register(Parent, ParentAdmin)
 custom_admin_site.register(Teacher, TeacherAdmin)
@@ -544,7 +544,7 @@ custom_admin_site.register(StudentAnswer,CustomModelAdmin)
 custom_admin_site.register(StudentProgress,CustomModelAdmin)
 custom_admin_site.register(Certificate,CustomModelAdmin)
 custom_admin_site.register(Rating,RatingAdmin)
-custom_admin_site.register(CachedValue)
+# custom_admin_site.register(CachedValue)
 
 
 # Register the custom admin site
