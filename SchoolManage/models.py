@@ -149,14 +149,7 @@ class CustomPermission(models.Model):
         verbose_name_plural = _("Custom Permissions")
 
 
-class RolePermission(models.Model):
-    role = models.ForeignKey(Role, on_delete=models.CASCADE)
-    permission = models.ForeignKey(AuthPermission, on_delete=models.CASCADE)
 
-    class Meta:
-        unique_together = ('role', 'permission')
-        verbose_name = _("Role Permission")
-        verbose_name_plural = _("Role Permissions")
 
 class Parent(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)

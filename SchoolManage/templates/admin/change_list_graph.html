@@ -1,0 +1,107 @@
+<!-- change_list_graph.html -->
+{% extends "admin/change_list.html" %}
+{% load static %}
+
+{% block extrahead %}
+    <!-- Add the necessary libraries and stylesheets here -->
+    {% comment %} <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"/> {% endcomment %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.0/Chart.min.js"></script>
+    <script>
+        var randomColorGenerator = function () {
+            return '#' + (Math.random().toString(16) + '0000000').slice(2, 8);
+        };
+        var options = {
+            responsive: true,
+            maintainAspectRatio: true,
+            legend: {
+                position: 'left'
+            },
+            title: {
+                display: true
+            },
+            animation: {
+                animateScale: true,
+                animateRotate: true
+            }
+        };
+        window.onload = function () {
+            // Gender Chart
+            var ctxGender = document.getElementById("gender-chart");
+            var genderList = [
+            {% for obj in cl.queryset %}
+                {% with gender=obj.get_gender_display %}
+                    {% if gender == 'Male' or gender == 'Female' %}
+                        '{{ gender }}',
+                    {% endif %}
+                {% endwith %}
+            {% endfor %}
+        ];
+        
+        
+            var genderChartData = genderList.reduce(function(acc, value) {
+                acc[value] = (acc[value] || 0) + 1;
+                return acc;
+            }, {});
+            var genderChart = new Chart(ctxGender, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(genderChartData),
+                    datasets: [{
+                        data: Object.values(genderChartData),
+                        backgroundColor: Object.keys(genderChartData).map(function() {
+                            return randomColorGenerator();
+                        })
+                    }]
+                },
+                options: options
+            });
+
+            // Country Chart
+            var ctxCountry = document.getElementById("country-chart");
+            // Assuming your country data is available in cl.queryset
+            var countryList = [
+                {% for obj in cl.queryset %}
+                    '{{ obj.country }}',
+                {% endfor %}
+            ];
+            var countryChartData = countryList.reduce(function(acc, value) {
+                acc[value] = (acc[value] || 0) + 1;
+                return acc;
+            }, {});
+            var countryChart = new Chart(ctxCountry, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(countryChartData),
+                    datasets: [{
+                        data: Object.values(countryChartData),
+                        backgroundColor: Object.keys(countryChartData).map(function() {
+                            return randomColorGenerator();
+                        })
+                    }]
+                },
+                options: options
+            });
+        }
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="container-fluid">
+        {{ block.super }}
+        <div class="row">
+            <div class="col-md-12">
+                <h1> Graphs </h1>
+                <hr>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <canvas id="gender-chart" style="width: 100px !important;"></canvas>
+            </div>
+            <div class="col-md-6">
+                <canvas id="country-chart" style="width: 100px !important;"></canvas>
+            </div>
+        </div>
+    </div>
+{% endblock %}
