@@ -47,10 +47,10 @@ CORS_ALLOW_CREDENTIALS= True  # For development; in production, specify your fro
 
 INSTALLED_APPS = [
     'jazzmin',
-     'admin_tools_stats',  # this must be BEFORE 'admin_tools' and 'django.contrib.admin'
-    'django_nvd3',
+    #  'admin_tools_stats',  # this must be BEFORE 'admin_tools' and 'django.contrib.admin'
+    # 'django_nvd3',
     
-        'admin_tools',  # Include 'admin_tools' after 'admin_tools_stats'
+    #     'admin_tools',  # Include 'admin_tools' after 'admin_tools_stats'
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
