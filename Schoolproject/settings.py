@@ -23,24 +23,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-vdzd+fpv9=*z83s)yox4h1(wpsomul!!^^xj$rl&a+50m*apk_'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-CORS_ALLOW_HEADERS = ['*']
-CORS_ALLOW_METHODS = ['*']
-CSRF_COOKIE_SAMESITE = 'None'
-ALLOWED_HOSTS = ['*']
-CORS_ALLOW_ALL_ORIGINS = True  # Application definition
+DEBUG = False
+CSRF_COOKIE_SAMESITE = 'Lax'
+ALLOWED_HOSTS = ['aml-school.com', 'localhost', '0.0.0.0', '127.0.0.1']
 
 CORS_ALLOWED_ORIGINS = [
+    "http://localhost",
     "http://localhost:5173",
     'http://127.0.0.1',
-    "http://0.0.0.0",  # For development
     "https://aml-school.com"  # For production
 ]
-# CORS_ALLOW_ORIGIN_WHITELIST = [
-#     "http://localhost:5173",  
-#     "http://localhost:4173/",# Add your React frontend URL
-# ]
-CSRF_COOKIE_SAMESITE = 'None'  # For production
+
 CSRF_COOKIE_SECURE = True  # For development
 
 CORS_ALLOW_CREDENTIALS = True  # For development; in production, specify your frontend's origin.
