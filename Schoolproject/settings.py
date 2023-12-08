@@ -24,7 +24,7 @@ SECRET_KEY = 'django-insecure-vdzd+fpv9=*z83s)yox4h1(wpsomul!!^^xj$rl&a+50m*apk_
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
-CSRF_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SAMESITE = 'None'
 ALLOWED_HOSTS = ['aml-school.com', 'localhost', '0.0.0.0', '127.0.0.1']
 
 CORS_ALLOWED_ORIGINS = [
@@ -34,9 +34,16 @@ CORS_ALLOWED_ORIGINS = [
     "https://aml-school.com"  # For production
 ]
 
-CSRF_COOKIE_SECURE = True  # For development
+CSRF_TRUSTED_ORIGINS = [
+    "https://aml-school.com",
+    "http://localhost",
+]
 
-CORS_ALLOW_CREDENTIALS = True  # For development; in production, specify your frontend's origin.
+CSRF_COOKIE_SECURE = True  # For development
+SESSION_COOKIE_SECURE=True
+SESSION_COOKIE_SAMESITE='None'
+
+#CORS_ALLOW_CREDENTIALS = True  # For development; in production, specify your frontend's origin.
 
 INSTALLED_APPS = [
     'jazzmin',
