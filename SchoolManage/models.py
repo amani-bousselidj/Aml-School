@@ -4,7 +4,6 @@ from django.contrib.contenttypes.models import ContentType
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
-from django.utils.translation import gettext_lazy as _
 from ckeditor.fields import RichTextField
 import uuid
 from django.core.exceptions import ValidationError
@@ -14,6 +13,8 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import RegexValidator
+
+
 class Role(models.Model):
     ROLE_CHOICES = [
         ('Student', 'Student'),
@@ -25,7 +26,7 @@ class Role(models.Model):
         max_length=50,
         choices=ROLE_CHOICES,
         blank=True,
-                verbose_name='Role',  # Add verbose name for 'name'
+        verbose_name='Role',  # Add verbose name for 'name'
     )
 
     custom_name = models.CharField(
@@ -33,9 +34,9 @@ class Role(models.Model):
         blank=True,
         null=True,
         unique=True,
-                verbose_name='Custom Role',  # Add verbose name for 'custom_name'
+        verbose_name='Custom Role',  # Add verbose name for 'custom_name'
     )
-    
+
     def save(self, *args, **kwargs):
         if not self.name and self.custom_name:
             self.name = self.custom_name
@@ -47,18 +48,13 @@ class Role(models.Model):
     class Meta:
         verbose_name = _("Role & Permissions")
         verbose_name_plural = _("Roles & Permissions")
-        
 
-
-
-
-
-    
 
 class Countries(models.Model):
     name = models.CharField(max_length=50)
     Date_Created = models.DateField(auto_now=False, auto_now_add=False)
-    countrie_flag = models.ImageField(upload_to='countries_flags/', height_field=None, width_field=None, max_length=None)
+    countrie_flag = models.ImageField(upload_to='countries_flags/', height_field=None, width_field=None,
+                                      max_length=None)
 
     def __str__(self):
         return self.name
@@ -109,20 +105,20 @@ class CustomUser(AbstractUser):
         verbose_name = _("Custom User")
         verbose_name_plural = _("Custom Users")
 
+
 @receiver(post_save, sender=CustomUser)
 def create_user_profile(sender, instance, created, **kwargs):
     if created and instance.role:
         try:
             role = instance.role  # Use the role directly, assuming it's already assigned correctly
             print(f"Role found: {role}")
-            
+
             if role.name == 'Teacher':
                 Teacher.objects.create(user=instance)
             elif role.name == 'Student':
                 Student.objects.create(user=instance)
         except Role.DoesNotExist:
             print(f"Role with name '{instance.role_name}' does not exist.")
-
 
 
 @receiver(post_save, sender=CustomUser)
@@ -132,6 +128,7 @@ def save_user_profile(sender, instance, **kwargs):
             instance.teacher.save()
         elif instance.role.name == 'Student':
             instance.student.save()
+
 
 class CustomPermission(models.Model):
     role = models.ForeignKey(Role, on_delete=models.CASCADE, null=True, default=None)
@@ -149,13 +146,12 @@ class CustomPermission(models.Model):
         verbose_name_plural = _("Custom Permissions")
 
 
-
-
 class Parent(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
     Parent_name = models.CharField(max_length=255, blank=True, null=True)
     Parent_phone = models.CharField(max_length=15, blank=True, null=True)
     Parent_occupation = models.CharField(max_length=255, blank=True, null=True)
+
     # children = models.ManyToManyField(CustomUser, related_name='parents',        limit_choices_to={'role__name__exact': 'student'})
 
     def __str__(self):
@@ -164,6 +160,7 @@ class Parent(models.Model):
     class Meta:
         verbose_name = _("Parent")
         verbose_name_plural = _("Parents")
+
 
 class Student(models.Model):
     GENDER_CHOICES = [
@@ -175,10 +172,11 @@ class Student(models.Model):
     admission_number = models.UUIDField(primary_key=False, default=uuid.uuid4, editable=False)
     student_name = models.CharField(max_length=255)
     class_name = models.CharField(max_length=50)
-    birthday = models.DateField(default=None,null=True,blank=True)
-    gender = models.CharField(max_length=10, choices=GENDER_CHOICES,null=True,blank=True)
-    mobile_phone_number = models.CharField(max_length=15,null=True,blank=True)
+    birthday = models.DateField(default=None, null=True, blank=True)
+    gender = models.CharField(max_length=10, choices=GENDER_CHOICES, null=True, blank=True)
+    mobile_phone_number = models.CharField(max_length=15, null=True, blank=True)
     parents = models.ManyToManyField(Parent)
+
     # Date_joined = models.DateField( auto_now=False, auto_now_add=False,default=None,null=True)
     def __str__(self):
         return self.user.username
@@ -186,8 +184,6 @@ class Student(models.Model):
     class Meta:
         verbose_name = _("Student")
         verbose_name_plural = _("Students")
-
-
 
 
 class Teacher(models.Model):
@@ -249,7 +245,8 @@ class Lesson(models.Model):
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, default=None)
     Subject = models.ForeignKey(Subject, on_delete=models.CASCADE, default=None)
     title = models.CharField(max_length=255)
-    lesson_type = models.CharField(max_length=20, choices=[('video', 'Video'), ('pdf', 'PDF'), ('text', 'Text'), ('document', 'Document')])
+    lesson_type = models.CharField(max_length=20, choices=[('video', 'Video'), ('pdf', 'PDF'), ('text', 'Text'),
+                                                           ('document', 'Document')])
     video_provider = models.CharField(max_length=20, blank=True, null=True)
     video_url = models.URLField(blank=True, null=True)
     duration = models.PositiveIntegerField(blank=True, null=True)
@@ -400,30 +397,39 @@ class LiveMeeting(models.Model):
     meeting_title = models.CharField(max_length=255)
     meeting_date_time = models.DateTimeField()
     meeting_url = models.URLField
-    Organizer = models.ForeignKey(CustomUser,  on_delete=models.CASCADE,default=None,null=True)
+    Organizer = models.ForeignKey(CustomUser, on_delete=models.CASCADE, default=None, null=True)
+
     def __str__(self):
         return self.meeting_title
+
     class Meta:
         verbose_name = _("LiveMeeting")
         verbose_name_plural = _("LiveMeetings")
 
+
 class Class(models.Model):
     class_name = models.CharField(max_length=50)
+
     def __str__(self):
         return self.class_name
-    
+
     class Meta:
         verbose_name = _("Class")
         verbose_name_plural = _("Classes")
-   
+
+
 class Section(models.Model):
     section_name = models.CharField(max_length=50)
     class_name = models.ForeignKey(Class, on_delete=models.CASCADE)
+
     def __str__(self):
         return self.section_name
+
     class Meta:
         verbose_name = _("Section")
         verbose_name_plural = _("Sections")
+
+
 class ExamResult(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     class_name = models.ForeignKey(Class, on_delete=models.CASCADE)
@@ -439,50 +445,63 @@ class ExamResult(models.Model):
     class Meta:
         verbose_name = _("ExamResult")
         verbose_name_plural = _("ExamResults")
+
+
 class LessonPlan(models.Model):
-    lesson = models.ForeignKey(Lesson,  on_delete=models.CASCADE,default=None,blank=True,null=True)
+    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, default=None, blank=True, null=True)
     topic = models.CharField(max_length=255)
     date = models.DateField()
     time_from = models.TimeField()
     time_to = models.TimeField()
-    lecture_youtube_url = models.URLField(default=None,blank=True)
-    attachment = models.FileField(upload_to='lesson_plan_attachments/',blank=True)
-    lecture_video = models.FileField(upload_to='lesson_plan_lecture_videos/',blank=True)
+    lecture_youtube_url = models.URLField(default=None, blank=True)
+    attachment = models.FileField(upload_to='lesson_plan_attachments/', blank=True)
+    lecture_video = models.FileField(upload_to='lesson_plan_lecture_videos/', blank=True)
     general_objectives = models.TextField()
     presentation_text_area = models.TextField()
-    class_name = models.ForeignKey(Class, on_delete=models.CASCADE,default=None,blank=True,null=True)
-    subject = models.ForeignKey(Subject,on_delete=models.CASCADE,default=None,blank=True,null=True)
-    section_name = models.ForeignKey(Section, on_delete=models.CASCADE,default=None,blank=True,null=True)
-    teacher=models.ForeignKey(Teacher, on_delete=models.CASCADE,default=None,blank=True)
+    class_name = models.ForeignKey(Class, on_delete=models.CASCADE, default=None, blank=True, null=True)
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, default=None, blank=True, null=True)
+    section_name = models.ForeignKey(Section, on_delete=models.CASCADE, default=None, blank=True, null=True)
+    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, default=None, blank=True)
+
     def __str__(self):
         return self.topic
+
     class Meta:
         verbose_name = _("LessonPlan")
         verbose_name_plural = _("LessonPlans")
+
+
 class Homework(models.Model):
-    teacher= models.ForeignKey(Teacher, on_delete=models.CASCADE,default=None,blank=True)
+    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, default=None, blank=True)
     class_name = models.ForeignKey(Class, on_delete=models.CASCADE)
-    section= models.ForeignKey(Section, on_delete=models.CASCADE,default=None,blank=True,null=True)
-    subject = models.ForeignKey(Subject, on_delete=models.CASCADE,default=None)
+    section = models.ForeignKey(Section, on_delete=models.CASCADE, default=None, blank=True, null=True)
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, default=None)
     homework_date = models.DateField()
     submission_date = models.DateField()
     document = models.FileField(upload_to='homework_documents/')
     description = models.TextField()
+
     def __str__(self):
         return f"{self.subject} - {self.homework_date}"
+
     class Meta:
         verbose_name = _("Homework")
         verbose_name_plural = _("Homeworks")
+
+
 class SubmitedHomworks(models.Model):
     Student = models.ForeignKey(Student, on_delete=models.CASCADE)
-    Homework =models.ForeignKey(Homework, on_delete=models.CASCADE)
+    Homework = models.ForeignKey(Homework, on_delete=models.CASCADE)
     attachement = models.FileField(upload_to='students_homework_documents/')
     SubmissionDate = models.DateField()
+
     class Meta:
         verbose_name = _("SubmitedHomwork")
         verbose_name_plural = _("SubmitedHomworks")
+
+
 class OnlineExam(models.Model):
-    teacher= models.ForeignKey(Teacher, on_delete=models.CASCADE,default=None,blank=True)
+    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, default=None, blank=True)
 
     exam_title = models.CharField(max_length=255)
     exam_from_date = models.DateField()
@@ -491,16 +510,18 @@ class OnlineExam(models.Model):
     time_duration = models.DurationField()
     attempt = models.IntegerField()
     description = models.TextField()
+
     def __str__(self):
         return self.exam_title
 
-
     def __str__(self):
         return f"{self.student} - {self.date_of_payment}"
-    
+
     class Meta:
         verbose_name = _("OnlineExam")
         verbose_name_plural = _("OnlineExams")
+
+
 class StudentAttempt(models.Model):
     quizz = models.ForeignKey(
         Quiz, on_delete=models.CASCADE, related_name="attempts"
@@ -509,9 +530,12 @@ class StudentAttempt(models.Model):
         CustomUser, on_delete=models.CASCADE, related_name="attempts"
     )
     score = models.PositiveIntegerField(default=0)
+
     class Meta:
         verbose_name = _("StudentAttempt")
         verbose_name_plural = _("StudentAttempts")
+
+
 class StudentAnswer(models.Model):
     attempt = models.ForeignKey(
         StudentAttempt, on_delete=models.CASCADE, related_name="answers"
@@ -519,9 +543,11 @@ class StudentAnswer(models.Model):
     answer = models.ForeignKey(
         Choice, on_delete=models.CASCADE, related_name="answer"
     )
+
     class Meta:
         verbose_name = _("StudentAnswer")
         verbose_name_plural = _("StudentAnswers")
+
 
 class StudentProgress(models.Model):
     user: CustomUser = models.ForeignKey(
@@ -535,10 +561,11 @@ class StudentProgress(models.Model):
 
     def __str__(self):
         return f"StudentProgress {self.user.username} - {self.course.title}"
-    
+
     class Meta:
         verbose_name = _("StudentProgress")
         verbose_name_plural = _("StudentProgresses")
+
 
 class Certificate(models.Model):
     user: CustomUser = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
@@ -564,29 +591,31 @@ class Certificate(models.Model):
         verbose_name = _("Certificate")
         verbose_name_plural = _("Certificates")
 
+
 class Rating(models.Model):
-     student: CustomUser = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-     video: Course = models.ForeignKey(
+    student: CustomUser = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    video: Course = models.ForeignKey(
         Course, on_delete=models.CASCADE, related_name="ratings"
     )
 
-     rating = models.FloatField(default=0)
+    rating = models.FloatField(default=0)
 
-     def __str__(self):
-         return f'{self.student} * {self.video}'
-     
-     def display_star_rating(self):
-      full_stars = int(self.rating)  # Number of full stars
-      remainder = self.rating - full_stars  # Fractional part for half stars
+    def __str__(self):
+        return f'{self.student} * {self.video}'
 
-      full_star_rating = "★" * full_stars
-      half_star_rating = "½" if remainder >= 0.5 else ""  # Display half star if remainder is 0.5 or more
+    def display_star_rating(self):
+        full_stars = int(self.rating)  # Number of full stars
+        remainder = self.rating - full_stars  # Fractional part for half stars
 
-      return full_star_rating + half_star_rating
+        full_star_rating = "★" * full_stars
+        half_star_rating = "½" if remainder >= 0.5 else ""  # Display half star if remainder is 0.5 or more
 
-     class Meta:
+        return full_star_rating + half_star_rating
+
+    class Meta:
         verbose_name = _("Rating")
         verbose_name_plural = _("Ratings")
+
 
 class Order(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
@@ -595,9 +624,11 @@ class Order(models.Model):
 
     def __str__(self):
         return f'Order {self.pk} {self.buyer.username}-{self.course.title}'
+
     class Meta:
         verbose_name = _("Order")
         verbose_name_plural = _("Orders")
+
 
 class Payment(models.Model):
     PENDING = 'p'
@@ -610,25 +641,34 @@ class Payment(models.Model):
         (REFUSED, _('Refused')),
     ]
 
-    order = models.OneToOneField(Order, on_delete=models.CASCADE,default=None)
+    order = models.OneToOneField(Order, on_delete=models.CASCADE, default=None)
     # receipt = models.FileField(upload_to=get_payment_upload_path)
     status = models.CharField(max_length=30, choices=STATUS_CHOICES, default=PENDING)
 
     def __str__(self):
         return f'{self.order.__str__()} Payment'
+
     class Meta:
         verbose_name = _("Payment")
         verbose_name_plural = _("Payment")
+
+
 class ShoppingCart(models.Model):
-    user = models.ForeignKey(CustomUser,  on_delete=models.CASCADE,default=None)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, default=None)
     courses = models.ManyToManyField(Course)
-    Date_create= models.DateField(auto_now=True)
+    Date_create = models.DateField(auto_now=True)
+
     def __str__(self):
         return f'{self.user} Cart'
+
     class Meta:
         verbose_name = _("ShoppingCart")
         verbose_name_plural = _("ShoppingCarts")
+
+
 from django.conf import settings
+
+
 class GeneralSettings(models.Model):
     site_name = models.CharField(max_length=255, blank=True, null=True)
     phone = models.CharField(max_length=20, blank=True, null=True)
@@ -681,37 +721,45 @@ class GeneralSettings(models.Model):
 
     def __str__(self):
         return "General Settings"
+
+
 class RolePermission(models.Model):
     role = models.ForeignKey(Role, on_delete=models.CASCADE)
-    service_name = models.ForeignKey(ContentType, on_delete=models.CASCADE,default=None,null=True)
+    service_name = models.ForeignKey(ContentType, on_delete=models.CASCADE, default=None, null=True)
     can_view = models.BooleanField(default=False)
     can_add = models.BooleanField(default=False)
     can_change = models.BooleanField(default=False)
     can_delete = models.BooleanField(default=False)
-    def __str__(self) :
+
+    def __str__(self):
         return f'{self.service_name.model}'
+
     class Meta:
         verbose_name = _("Permission")
         verbose_name_plural = _("Permissions")
+
     def get_service_name(self):
         return self.service_name
+
     @receiver(post_save, sender=Role)
     def extend_permissions(sender, instance, **kwargs):
-     if instance.name in ['Student', 'Teacher', 'Parent']:
-        # Copy default permissions for Student, Teacher, Parent
-        default_permissions = RolePermission.objects.filter(role__name=instance.name)
-        for permission in default_permissions:
-            RolePermission.objects.get_or_create(
-                role=instance,
-                service_name=permission.service_name,
-                can_view=permission.can_view,
-                can_add=permission.can_add,
-                can_change=permission.can_change,
-                can_delete=permission.can_delete
-            )
+        if instance.name in ['Student', 'Teacher', 'Parent']:
+            # Copy default permissions for Student, Teacher, Parent
+            default_permissions = RolePermission.objects.filter(role__name=instance.name)
+            for permission in default_permissions:
+                RolePermission.objects.get_or_create(
+                    role=instance,
+                    service_name=permission.service_name,
+                    can_view=permission.can_view,
+                    can_add=permission.can_add,
+                    can_change=permission.can_change,
+                    can_delete=permission.can_delete
+                )
+
 
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
+
 
 class Permission(models.Model):
     role = models.ForeignKey(Role, on_delete=models.CASCADE)
@@ -720,20 +768,17 @@ class Permission(models.Model):
     can_add = models.BooleanField(default=False)
     can_change = models.BooleanField(default=False)
     can_delete = models.BooleanField(default=False)
+
     def __str__(self):
         return f'{self.role.name}-Permissions'
+
     def get_service_name(self):
-        return self.service_name.model 
+        return self.service_name.model
+
     class Meta:
         verbose_name = _("Permission")
         verbose_name_plural = _("Permissions")
 
-    
-
 
 class UICustomization(models.Model):
     code_snippet = models.TextField()
-
-
-
-    

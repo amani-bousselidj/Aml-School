@@ -2,6 +2,7 @@
 
 from .models import GeneralSettings
 
+
 def custom_logo(request):
     try:
         general_settings = GeneralSettings.objects.first()
