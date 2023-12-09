@@ -295,7 +295,7 @@ class GeneralSettingsAdmin(admin.ModelAdmin):
 
     # Disable the "Add" permission for GeneralSettings
     def has_add_permission(self, request):
-        return True
+        return False
 
 
 # ...
