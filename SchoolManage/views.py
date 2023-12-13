@@ -143,28 +143,38 @@ class RegisterUserView(generics.CreateAPIView):
             print(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['POST'])
+from django.contrib.auth import authenticate
+from rest_framework.authtoken.models import Token
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
 
+@api_view(['POST'])
 def user_login(request):
     if request.method == 'POST':
         username = request.data.get('username')
         password = request.data.get('password')
-        print(username,password)
         user = None
+
         if '@' in username:
             try:
                 user = CustomUser.objects.get(email=username)
-                print(user)
             except ObjectDoesNotExist:
                 pass
 
         if not user:
             user = authenticate(username=username, password=password)
-            print(user)
+
         if user:
             token, _ = Token.objects.get_or_create(user=user)
-            print(token,user)
-            return Response({'token': token.key ,'message': 'successful login' }, status=status.HTTP_200_OK)
+            serializer = CustomUserSerializer(user)
+            profile_picture_url = serializer.data.get('profile_picture', None)
+
+            return Response({
+                'token': token.key,
+                'message': 'successful login',
+                'profile_picture': profile_picture_url
+            }, status=status.HTTP_200_OK)
 
         return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 from django.contrib.auth import get_user_model
