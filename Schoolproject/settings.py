@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-vdzd+fpv9=*z83s)yox4h1(wpsomul!!^^xj$rl&a+50m*apk_'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 CSRF_COOKIE_SAMESITE = 'None'
 ALLOWED_HOSTS = ['aml-school.com', 'localhost', '0.0.0.0', '127.0.0.1']
 
@@ -54,7 +54,10 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
-
+      'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.facebook',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
@@ -185,9 +188,9 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # Additional static file locations (if needed)
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'Schoolproject/static')
-]
+# STATICFILES_DIRS = [
+#     os.path.join(BASE_DIR, 'static')
+# ]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -213,7 +216,8 @@ REST_FRAMEWORK = {
 #     return '/static/admin/img/about-image-02.png'  # Default logo URL
 # from .admin_settings import get_dynamic_site_logo
 AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',  # Default ModelBackend
+    'django.contrib.auth.backends.ModelBackend',  
+        'allauth.account.auth_backends.AuthenticationBackend',# Default ModelBackend
     # Add any custom backends if needed
 ]
 # SITE_LOGO_URL = '/static/admin/img/about-image-02.png' 
@@ -339,3 +343,26 @@ JAZZMIN_UI_TWEAKS = {
 
 MEDIA_ROOT = BASE_DIR / 'media'
 MEDIA_URL = '/media/'
+# settings.py
+
+SOCIALACCOUNT_PROVIDERS = {
+    'facebook': {
+        'METHOD': 'oauth2',
+        'SCOPE': ['email', 'public_profile'],
+        'AUTH_PARAMS': {'auth_type': 'reauthenticate'},
+        'FIELDS': [
+            'id',
+            'email',
+            'name',
+            'first_name',
+            'last_name',
+            'verified',
+            'locale',
+            'timezone',
+            'link',
+            'gender',
+            'updated_time',
+        ],
+        'VERSION': 'v12.0',
+    }
+}
