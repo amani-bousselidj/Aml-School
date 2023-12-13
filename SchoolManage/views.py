@@ -167,6 +167,29 @@ def user_login(request):
             return Response({'token': token.key ,'message': 'successful login' }, status=status.HTTP_200_OK)
 
         return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+from django.contrib.auth import get_user_model
+from django.http import JsonResponse
+from allauth.socialaccount.models import SocialAccount
+
+def facebook_login(request):
+    if request.method == 'POST':
+        access_token = request.data.get('access_token')
+        user_id = request.data.get('user_id')
+
+        # You may want to validate the access_token and user_id here
+
+        # Get user information from Facebook
+        social_account = SocialAccount.objects.filter(provider='facebook', uid=user_id).first()
+
+        if social_account:
+            user = social_account.user
+            # Perform your custom login logic if needed
+
+            # Assuming you have a serializer for the user
+            user_serializer = CustomUserSerializer(user)
+            return JsonResponse(user_serializer.data, status=200)
+
+    return JsonResponse({'error': 'Invalid request'}, status=400)
 
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes
