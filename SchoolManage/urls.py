@@ -103,6 +103,7 @@ urlpatterns = [
         path('register/', RegisterUserView.as_view(), name='register'),
     path('logout/', user_logout, name='logout'),
     path('login/', user_login, name='login'),
+        path('facebook-login/', facebook_login, name='facebook-login'),
     path('create-course/', create_course, name='create-course'),
                     path('update_course/<int:course_id>/', views.update_course, name='update_course'),
         path('get_course/<int:course_id>/', views.get_course, name='get_course'),
